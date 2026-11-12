@@ -23,12 +23,18 @@ worker, at the warm-up, so the hook cannot filter there. Instead it defines
 
 In a Velocity worker `exit()` throws `Q_WebServer_ExitSignal`, so that it ends
 the request and not the worker. The library's `Shield::protect()` catches every
-`\Throwable` and takes it for its own failure ("shield error"), although it has
-already written its answer (a refusal, the browser check, a page of its
-dashboard). `expRequestShield::protect()` handles this: a "shield error" after
-which the status or a header of an answer changed is that exit, and the request
-ends there. A real failure changes neither and goes on to the site.
+`\Throwable` and would take that for its own failure ("shield error"), although
+it has already written its answer (a refusal, the browser check, a page of its
+dashboard): the debug header would read `X-RS: allow-uncached shield error` and
+PHP's error log would get a false "the shield failed" line.
 
-The visible trace is the debug header (`set debug-header on`): under Velocity a
-refusal reads `X-RS: allow-uncached shield error` instead of `X-RS: reject ...`,
-with the right status and the shield's own page. The log line is the normal one.
+So in a Velocity worker `expRequestShield::protect()` runs the library's own
+steps (the settings of this request's website, then the decision) with exactly
+that one difference: Velocity's exit signal passes on and ends the request; any
+other failure is handled by the library as always (the request goes on to the
+site). The answers, the headers and the log are the same as under PHP-FPM.
+
+Should a future library change its inner steps, the extension notices it (it
+checks them once per worker) and falls back to `Shield::protectFile()`, ending
+the request when the shield has written an answer of its own; only the debug
+header and the error log then show the "shield error" again.

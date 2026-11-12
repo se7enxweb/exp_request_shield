@@ -126,16 +126,21 @@ class expRequestShield
         return class_exists( 'CjwNetwork\\RequestShield\\Shield', false );
     }
 
+    /** The exception Exponential Velocity throws for exit() in a worker, so that it ends the request, not the worker. */
+    const VELOCITY_EXIT = 'Q_WebServer_ExitSignal';
+
     /**
      * Decides the current request. Called by bootstrap/prepend.php only.
      *
-     * Under Exponential Velocity exit() throws Q_WebServer_ExitSignal, which
-     * the library's catch (\Throwable) takes for a failure ("shield error"),
-     * although the shield has already written its own answer (a refusal, the
-     * check page, a page of its dashboard). A "shield error" after which the
-     * status or a header of an answer has changed is that exit: the request
-     * ends here. A real failure changes neither and goes on to the site, as
-     * the library intends (fail open).
+     * Under PHP-FPM this is Shield::protectFile(). Under Exponential Velocity
+     * exit() throws Q_WebServer_ExitSignal, and the library's protect() catches
+     * every Throwable as its own failure ("shield error"): its answer (a
+     * refusal, the check page, a page of its own) would be marked as a failure
+     * in the debug header and in PHP's error log. So in a Velocity worker the
+     * same steps run here with that one exception let through, as an exit is
+     * meant to be (protectVelocity()). Should the library's inner steps ever
+     * look different, the request falls back to protectFile() and ends the
+     * request when the shield has written an answer of its own.
      *
      * @return void
      */
@@ -145,6 +150,9 @@ class expRequestShield
             return;
         $file = self::ruleFile();
         if ( !is_file( $file ) )
+            return;
+
+        if ( class_exists( 'Q_WebServer', false ) && class_exists( self::VELOCITY_EXIT, false ) && self::protectVelocity( $file ) )
             return;
 
         $statusBefore = http_response_code();
@@ -157,6 +165,61 @@ class expRequestShield
         {
             exit;
         }
+    }
+
+    /**
+     * Shield::protectFile() for a Velocity worker: the same steps (where
+     * "already noted" is kept, the rule file, the settings of this request's
+     * website, the decision), each failure handled by the library's own
+     * failedOpen() -- except Velocity's exit signal, which passes on and ends
+     * the request with the answer the shield wrote.
+     *
+     * @param string $file the main rule file
+     * @return bool false when the library's inner steps are not the expected ones (the caller falls back)
+     */
+    private static function protectVelocity( $file )
+    {
+        static $usable = null;
+        $shield = 'CjwNetwork\\RequestShield\\Shield';
+        if ( $usable === null )
+        {
+            try
+            {
+                $r = new \ReflectionClass( $shield );
+                $usable = $r->hasMethod( 'run' ) && $r->hasMethod( 'failedOpen' )
+                          && $r->hasProperty( 'failedDir' ) && $r->hasProperty( 'ruleFile' )
+                          && $r->getMethod( 'run' )->getNumberOfParameters() === 2
+                          && $r->getMethod( 'failedOpen' )->getNumberOfParameters() === 2;
+            }
+            catch ( \ReflectionException $e )
+            {
+                $usable = false;
+            }
+        }
+        if ( !$usable )
+            return false;
+
+        $cacheDir = self::cacheDir();
+        $exit = self::VELOCITY_EXIT;
+        $decide = \Closure::bind( static function () use ( $file, $cacheDir, $exit ) {
+            if ( self::$failedDir === null )
+                self::$failedDir = $cacheDir;
+            self::$ruleFile = $file;
+            $settings = null;
+            try
+            {
+                $settings = \CjwNetwork\RequestShield\Settings::loadFor( $file, $_SERVER, $cacheDir, array() );
+                return self::run( $settings, null );
+            }
+            catch ( \Throwable $e )
+            {
+                if ( $e instanceof $exit )
+                    throw $e;
+                return self::failedOpen( $e, $settings );
+            }
+        }, null, $shield );
+        $decide();
+        return true;
     }
 
     /** The response headers so far, without the shield's diagnostics and cookies. */

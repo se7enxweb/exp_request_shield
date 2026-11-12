@@ -51,6 +51,28 @@ class RequestShieldTest extends PHPUnit\Framework\TestCase
         $this->assertSame( '0.4.0', $v['version'] );
     }
 
+    /**
+     * The Velocity path (expRequestShield::protectVelocity()) runs the library's inner steps itself: they must be
+     * there with the expected shape, in this build and in the PHP 7.4 build, or a worker falls back.
+     */
+    public function testTheLibraryHasTheStepsTheVelocityPathUses()
+    {
+        $this->assertTrue( expRequestShield::loadLibrary() );
+        $r = new ReflectionClass( 'CjwNetwork\\RequestShield\\Shield' );
+        $this->assertSame( 2, $r->getMethod( 'run' )->getNumberOfParameters() );
+        $this->assertSame( 2, $r->getMethod( 'failedOpen' )->getNumberOfParameters() );
+        $this->assertTrue( $r->hasProperty( 'failedDir' ) && $r->getProperty( 'failedDir' )->isStatic() );
+        $this->assertTrue( $r->hasProperty( 'ruleFile' ) && $r->getProperty( 'ruleFile' )->isStatic() );
+        foreach ( array( '', '/php74' ) as $build )
+        {
+            $code = file_get_contents( self::ext() . '/lib/requestshield' . $build . '/request-shield.php' );
+            $this->assertMatchesRegularExpression( '/private static function run\\(.*\\$config, \\?callable \\$known\\)/', $code, "run() in build '$build'" );
+            $this->assertMatchesRegularExpression( '/private static function failedOpen\\(\\\\Throwable \\$e, \\?Settings \\$s\\)/', $code, "failedOpen() in build '$build'" );
+            $this->assertMatchesRegularExpression( '/private static [^;]*\\$failedDir = null;/', $code );
+            $this->assertMatchesRegularExpression( '/private static [^;]*\\$ruleFile = null;/', $code );
+        }
+    }
+
     public function testTheVersionIsTheSameEverywhere()
     {
         $ext = self::ext();

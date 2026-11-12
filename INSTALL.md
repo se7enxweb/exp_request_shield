@@ -71,8 +71,13 @@ it), so the site's main file includes the copies beside it. In the copy:
    ```
 3. Name the site's host names, so a request for any other name is refused:
    ```
-   host www.example.org example.org admin.example.org
+   host shop.example.com example.com admin.example.com
+   host www.example.org                  # the documentation domain the shipped examples use
    ```
+   Keep `www.example.org` listed: the library's Exponential examples send
+   `Origin: https://www.example.org`, and `test` fails five of them when it is
+   not one of the site's names. It is reserved for documentation, so no real
+   visitor ever sends it.
 4. Name the load balancer or proxy in front, if any (`trust 10.0.0.0/8`).
 
 The web server must never serve `settings/` or `var/request-shield/`. A

@@ -12,8 +12,9 @@ The first release.
 - Added: `expRequestShield`: the main rule file from `EXP_REQUEST_SHIELD_RULES`,
   `settings/request-shield/request-shield.rules` or the extension's default; the
   compiled settings in `var/request-shield/cache/`; `var/request-shield/PAUSED`
-  switches the shield off; Velocity's exit() in a worker ends the request with
-  the shield's answer.
+  switches the shield off; under Velocity the library's exit signal passes
+  through, so a refusal, the browser check and the shield's own pages answer
+  exactly as under PHP-FPM (same headers, no false "shield failed" in the log).
 - Added: the default main rule file (enforce mode: on as installed; the store and log in
   `var/request-shield/`, the library's own pages closed to all but the server)
   and the library's Exponential rules.
