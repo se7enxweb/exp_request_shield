@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  The exp_request_shield unit tests: the paths and the order the main rule file is found in, the log summary and the
+  chart of the admin, the shipped rules (check and test with the bundled library), the admin's styling rules and the
+  translations. No database, no request, no Exponential root needed.
+  Run (from extension/exp_request_shield inside an installation): php ../../vendor/bin/phpunit
+  or with any PHPUnit 9.6 or later: phpunit -c phpunit.xml.dist
+-->
+<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         bootstrap="tests/bootstrap.php"
+         colors="false"
+         failOnWarning="true"
+         failOnRisky="true"
+         beStrictAboutOutputDuringTests="true">
+    <testsuites>
+        <testsuite name="unit">
+            <directory suffix="Test.php">tests/unit</directory>
+        </testsuite>
+    </testsuites>
+</phpunit>

@@ -1,0 +1,44 @@
+#!/usr/bin/env php
+<?php
+/**
+ * exp_request_shield: the library's command line with every bundled part loaded
+ * (statistics, API, firewall pages, HTTP cache), so a rule file that uses them
+ * is checked as the shield reads it.
+ *
+ *   php extension/exp_request_shield/bin/request-shield check <main rule file>
+ *   php extension/exp_request_shield/bin/request-shield test  <main rule file>
+ *   php extension/exp_request_shield/bin/request-shield trace <main rule file> "GET https://www.example.org/"
+ *   php extension/exp_request_shield/bin/request-shield help
+ *
+ * Without a rule file argument where one is expected, name the main rule file
+ * the site uses: bin/request-shield rules prints it.
+ *
+ * Run it as the user the web server runs PHP as, so the compiled settings and
+ * the store stay writable for the site.
+ *
+ * @copyright Copyright (C) 1998 - 2026 Exponential Foundation and 7x. All rights reserved.
+ * @license GNU General Public License v2.0 (or any later version), see LICENSE
+ * @package exp_request_shield
+ */
+
+if ( PHP_SAPI !== 'cli' )
+    exit( 1 );
+
+require __DIR__ . '/../classes/exprequestshield.php';
+
+$argv = array_values( array_map( 'strval', $_SERVER['argv'] ?? array() ) );
+
+if ( ( $argv[1] ?? '' ) === 'rules' )
+{
+    $r = expRequestShield::ruleFileSource();
+    echo $r['file'], ' (', $r['source'], ")\n";
+    exit( 0 );
+}
+
+if ( !expRequestShield::loadLibrary() )
+{
+    fwrite( STDERR, "request-shield: the library is missing from lib/requestshield\n" );
+    exit( 1 );
+}
+
+exit( \CjwNetwork\RequestShield\Cli::main( $argv ) );

@@ -1,0 +1,43 @@
+{
+    "name": "se7enxweb/exp_request_shield",
+    "description": "request-shield for Exponential: a mini web application firewall that decides every request before the kernel starts, with Setup > Request shield in the admin (dashboard with a chart, log, rules).",
+    "type": "ezpublish-legacy-extension",
+    "keywords": [
+        "Exponential",
+        "extension",
+        "security",
+        "waf",
+        "web application firewall",
+        "rate limiting",
+        "bot protection",
+        "proof of work",
+        "request-shield"
+    ],
+    "homepage": "https://github.com/se7enxweb/exp_request_shield",
+    "license": "GPL-2.0-or-later",
+    "authors": [
+        {
+            "name": "7x",
+            "homepage": "https://se7enx.com"
+        },
+        {
+            "name": "JAC Systeme GmbH (CJW Network)",
+            "homepage": "https://cjw-network.com",
+            "role": "Author of request-shield"
+        }
+    ],
+    "support": {
+        "issues": "https://github.com/se7enxweb/exp_request_shield/issues",
+        "source": "https://github.com/se7enxweb/exp_request_shield"
+    },
+    "require": {
+        "php": ">=7.4",
+        "se7enxweb/exponential-legacy-installer": "*"
+    },
+    "suggest": {
+        "ext-apcu": "Counters in shared memory (the file store is used without it)"
+    },
+    "extra": {
+        "ezpublish-legacy-extension-name": "exp_request_shield"
+    }
+}

@@ -1,0 +1,37 @@
+# request-shield for an Exponential site whose admin has a host of its own
+# (admin.example.org, host matching). The main file: load this one.
+#
+#   CjwNetwork\RequestShield\Shield::protectFile('/path/to/exponential-admin-host.rules');
+#
+# The frontend's rules come from exponential.rules; the admin's host gets its
+# own block (picked by the web server's server name, so a visitor cannot pick
+# it with a Host header). Reasons: docs/use-cases/exponential.md.
+
+ids EXP
+version 2026-10-17.1
+
+include     exponential.rules                                  # the frontend: system URLs, forms, search, pace
+
+# The login (/user/login) is checked by EXP-LOGIN: a fresh check, from the last 15 minutes.
+# On the visitors' host, /admin is no admin: a system URL like any other.
+expect GET https://www.example.org/admin/content/view/full/2   404 by EXP-SYSVIEW
+
+site admin.example.org {
+  [EXP-AH-SYS]    unblock [EXP-SYSVIEW] [EXP-MODULES]         # the admin uses system URLs (/content/view/full/2) and its modules
+  expect GET /content/view/full/2 with pass          answered
+  expect GET /class/grouplist with pass               answered
+  [EXP-AH-POST]   allow POST /**                              # editors save everywhere in the admin
+  expect POST /class/edit/1 with pass               answered
+  [EXP-AH-BG]     api-path /user/megamenu/**                  # the admin's background fragments (the mega menu): the check as JSON, never the page
+  expect GET /user/megamenu/setup with pass           answered
+  expect GET /user/megamenu/setup header X-Requested-With:XMLHttpRequest   json-check by EXP-AH-CHECK   # no pass: JSON, not the HTML check page
+  [EXP-AH-CHECK]  challenge /**                               # every editor: the browser check once per pass
+  expect GET /dashboard                               check
+  expect GET /content/view/full/2 header Sec-Fetch-Dest:empty   json-check   # any fetch of the admin's: the check as JSON
+  expect GET /user/login                              check by EXP-LOGIN
+  [EXP-AH-AREA]   backend /**                                 # the editors' area: its forms counted apart in the statistics
+  [EXP-AH-Q]      query * text                                # the admin's parameters: all known, free text scanned for attacks
+  expect GET /dashboard?anything=goes with pass       answered
+  #[EXP-AH-NET]   restrict /** to 192.0.2.0/24                # the office only (or a VPN): take the "#" away
+  set             pass-ttl 8h                                 # editors: one check a working day (visitors keep 2 hours)
+}

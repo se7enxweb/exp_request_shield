@@ -1,0 +1,5 @@
+rules/.request-shield/
+/vendor/
+.rector-cache/
+tests/.tmp-*/
+.phpunit.result.cache

@@ -1,0 +1,59 @@
+# exp_request_shield: the main rule file shipped with the extension.
+#
+# The shield loads this file until the site has its own:
+#   settings/request-shield/request-shield.rules
+# (copy this file there, fix the paths below, and edit the copy; the extension's
+# files are replaced by every update). See doc/configuration.md.
+#
+# Check after every edit:
+#   php extension/exp_request_shield/bin/request-shield check <main rule file>
+#   php extension/exp_request_shield/bin/request-shield test  <main rule file>
+#
+# The library's documentation of every line: https://github.com/cjw-network/request-shield
+# (docs/reference/rule-files.md, docs/reference/settings.md, docs/use-cases/exponential.md).
+#
+# Copyright (C) 1998 - 2026 Exponential Foundation and 7x. GNU General Public License v2.0 (or any later version);
+# the included exponential*.rules are request-shield's, under its MIT License (LICENSE.md).
+
+ids SITE
+version 0.0.1.0
+
+# The Exponential rules of the library (examples/exponential/, copied unchanged):
+# the frontend (exponential.rules) and the admin as the siteaccess /admin.
+# For an admin on a host of its own (admin.example.org) include
+# exponential-admin-host.rules instead.
+include     exponential-admin-uri.rules
+
+# --------------------------------------------------------------------------
+# Mode. "enforce": the protection is on as installed -- scanners, floods,
+# stray forms and system URLs are refused, the login and the admin's forms
+# ask for the browser check. Rules with "monitor" in front of them stay
+# watched only. To watch everything first and refuse nobody (logged as
+# monitor-...), write "set mode monitor"; "set mode off" switches it off.
+# --------------------------------------------------------------------------
+set         mode enforce
+
+# --------------------------------------------------------------------------
+# Where the shield writes: relative paths are relative to this file. From
+# extension/exp_request_shield/rules/ three levels up is the installation's
+# root, so everything goes to var/request-shield/. Keep it out of the
+# document root's reach (the web server must never hand out var/request-shield/).
+# --------------------------------------------------------------------------
+set         store-dir ../../../var/request-shield/store
+set         log ../../../var/request-shield/log/shield.log
+set         log-level flag
+
+# The statistics pages of the library (requests, rules, status codes per hour)
+# under /rs/stats/. They are served by the shield itself and need access rules
+# of their own before they are switched on: see doc/dashboard.md.
+set         stats off
+
+# The library serves pages of its own below the dashboard path (/rs): the
+# statistics, the firewall's rules, live and lists pages, the API. They stay
+# closed to everyone but the server itself until the site opens them, either
+# for its addresses ("restrict /rs/** to 192.0.2.10") or with a login token
+# ("dashboard-access * sha256:...", made by bin/request-shield access-token).
+# The admin's Setup > Request shield page needs none of this.
+[SITE-DASH]  restrict /rs/** to 127.0.0.1 ::1
+expect GET /rs/stats/overview from 198.51.100.27 403 by SITE-DASH    # the shield's own pages, from outside
+expect GET /rs/stats/overview from 127.0.0.1 answered                 # from the server itself

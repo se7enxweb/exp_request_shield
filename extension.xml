@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<software>
+    <metadata>
+        <name>Exponential Request Shield</name>
+        <version>0.0.1.0</version>
+        <copyright>Copyright (C) 1998 - 2026 Exponential Foundation and 7x. All rights reserved. request-shield: Copyright (C) 2026 JAC Systeme GmbH (CJW Network)</copyright>
+        <license>GNU General Public License v2.0 (or any later version)</license>
+        <info_url>https://github.com/se7enxweb/exp_request_shield</info_url>
+    </metadata>
+</software>

@@ -1,0 +1,73 @@
+/*
+ * exp_request_shield: what the administration's shared components (components.css: .a4-card, .a4-figures,
+ * .a4-table, .a4-tabs, .a4-chips, .a4-notice, .a4-fold ...) cannot do for Setup > Request shield: the chart of
+ * decisions per hour, the colours of the four groups, chips that are links, and long paths and URLs. Loaded on admin
+ * pages through design.ini [StylesheetSettings] BackendCSSFileList, so the ezjscore packer bundles it.
+ *
+ * Rules (doc/bc/6.0/admin4-styling.md): only .a4-rs-* classes; colours, radius, spacing and fonts only from the
+ * --a4-* tokens, which have their dark values in components.css, so the pages follow light and dark mode with no
+ * rule of their own here. The groups: refused --a4-bad, browser check --a4-warn, watched (monitor) --a4-chart-1,
+ * other --a4-muted.
+ */
+
+/* ---- Frame ----------------------------------------------------------------------------------------------------- */
+
+.a4-rs-nav { margin-bottom: var(--a4-space-4); }
+.a4-rs-path { overflow-wrap: anywhere; }
+.a4-rs-notes { margin: var(--a4-space-3) 0 0; padding-left: var(--a4-space-4); font-size: var(--a4-text-s); }
+
+/* ---- The four groups ------------------------------------------------------------------------------------------- */
+
+.a4-rs-figure.is-refused strong { color: var(--a4-bad); }
+.a4-rs-figure.is-checked strong { color: var(--a4-warn); }
+.a4-rs-figure.is-watched strong { color: var(--a4-info); }
+
+.a4-rs-badge.is-refused { border-color: var(--a4-bad-line); background-color: var(--a4-bad-bg); color: var(--a4-bad); }
+.a4-rs-badge.is-checked { border-color: var(--a4-warn-line); background-color: var(--a4-warn-bg); color: var(--a4-warn); }
+.a4-rs-badge.is-watched { border-color: var(--a4-info-line); background-color: var(--a4-info-bg); color: var(--a4-info); }
+
+/* ---- The chart: stacked bars, one per hour --------------------------------------------------------------------- */
+
+.a4-rs-chart { margin: 0; padding: var(--a4-space-3); border: 1px solid var(--a4-line); border-radius: var(--a4-radius); background-color: var(--a4-card); }
+.a4-rs-chart-svg { display: block; width: 100%; height: auto; overflow: visible; }
+.a4-rs-chart-axis { stroke: var(--a4-line-strong); stroke-width: 1; }
+.a4-rs-chart-tick { fill: var(--a4-muted); font-family: var(--a4-font); font-size: var(--a4-text-xs); }
+.a4-rs-bar { fill: var(--a4-muted); }
+.a4-rs-bar.is-refused { fill: var(--a4-bad); }
+.a4-rs-bar.is-checked { fill: var(--a4-warn); }
+.a4-rs-bar.is-watched { fill: var(--a4-chart-1); }
+.a4-rs-chart g:hover .a4-rs-bar { opacity: 0.8; }
+
+.a4-rs-legend { display: flex; flex-wrap: wrap; gap: var(--a4-space-2) var(--a4-space-4); margin-top: var(--a4-space-2); color: var(--a4-muted); font-size: var(--a4-text-xs); }
+.a4-rs-key { display: inline-flex; align-items: center; gap: var(--a4-space-1); }
+.a4-rs-key::before { content: ""; display: inline-block; width: 0.75em; height: 0.75em; border-radius: var(--a4-radius-s); background-color: var(--a4-muted); }
+.a4-rs-key.is-refused::before { background-color: var(--a4-bad); }
+.a4-rs-key.is-checked::before { background-color: var(--a4-warn); }
+.a4-rs-key.is-watched::before { background-color: var(--a4-chart-1); }
+
+/* ---- The log --------------------------------------------------------------------------------------------------- */
+
+.a4-rs-filter { margin-bottom: var(--a4-space-3); }
+.a4-rs-filter a.a4-chip { text-decoration: none; }
+.a4-rs-filter a.a4-chip:hover span { border-color: var(--a4-accent); }
+.a4-rs-filter a.a4-chip.is-current span { border-color: var(--a4-accent-strong); background-color: var(--a4-accent-strong); color: var(--a4-on-accent); }
+.a4-rs-filter a.a4-chip:focus-visible { outline: 3px solid var(--a4-ring); outline-offset: 2px; }
+
+.a4-rs-log td { vertical-align: top; }
+.a4-rs-request { max-width: 32rem; }
+.a4-rs-url { font-family: var(--a4-mono); font-size: var(--a4-text-xs); overflow-wrap: anywhere; }
+.a4-rs-pager { display: flex; flex-wrap: wrap; align-items: center; gap: var(--a4-space-2); margin-top: var(--a4-space-3); }
+
+/* ---- The rule files -------------------------------------------------------------------------------------------- */
+
+.a4-rs-file { margin-top: var(--a4-space-3); }
+.a4-rs-source { max-height: 36rem; overflow: auto; font-size: var(--a4-text-xs); }
+
+/* ---- The switches at the top of the dashboard ------------------------------------------------------------------ */
+
+.a4-rs-controls { margin-bottom: var(--a4-space-4); }
+.a4-rs-switches { display: flex; flex-wrap: wrap; align-items: center; gap: var(--a4-space-3) var(--a4-space-6); }
+.a4-rs-switch { display: flex; flex-wrap: wrap; align-items: center; gap: var(--a4-space-2); }
+.a4-rs-segment { display: inline-flex; flex-wrap: wrap; gap: var(--a4-space-1); }
+.a4-rs-badge.is-on { border-color: var(--a4-ok-line); background-color: var(--a4-ok-bg); color: var(--a4-ok); }
+.a4-rs-switch-help { margin: var(--a4-space-2) 0 0; }
