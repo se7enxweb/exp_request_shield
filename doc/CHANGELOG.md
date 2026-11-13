@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.0.1.2
+
+- Updated: The default rules include the library's `@wordpress` set: an Exponential site is no WordPress, so
+  `/wp-admin`, `/wp-login.php`, `xmlrpc.php`, `wp-content` and the rest are refused (404) before the kernel starts.
+  Before, they reached the site, which answered its own "not found" page.
+- Updated: The rule file and doc/configuration.md no longer say that a site with an admin host needs absolute paths
+  for the store and the log: relative paths (relative to the rule file) work with a `site` block too. What the
+  0.0.1.1 notes took for that was the include order: `exponential.rules` sets a store and a log of its own, so the
+  site's settings must come after it.
+
 ## 0.0.1.1
 
 - Updated: The default rules treat every admin siteaccess of a default installation like `/admin`: `adminui`,

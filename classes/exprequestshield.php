@@ -29,7 +29,7 @@
 class expRequestShield
 {
     /** The extension's version, as in ezinfo.php and extension.xml. */
-    const VERSION = '0.0.1.1';
+    const VERSION = '0.0.1.2';
 
     /**
      * The library files, in the order they must be loaded: the core first, the API before the firewall pages. They

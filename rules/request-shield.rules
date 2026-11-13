@@ -16,7 +16,7 @@
 # the included exponential*.rules are request-shield's, under its MIT License (LICENSE.md).
 
 ids SITE
-version 0.0.1.1
+version 0.0.1.2
 
 # The Exponential rules of the library (examples/exponential/, copied unchanged):
 # the frontend (exponential.rules) and the admin as the siteaccess /admin.
@@ -57,7 +57,7 @@ expect GET /adminui/user/megamenu/setup                       json-check by SITE
 #   include exponential-admin-host.rules   (a copy, with "site admin.example.org"
 #                                            replaced by the admin's host names, and
 #                                            its own "include exponential.rules" removed)
-# and give store-dir and log as absolute paths there. See doc/configuration.md.
+# (store-dir and log stay relative to this file, or absolute). See doc/configuration.md.
 
 # --------------------------------------------------------------------------
 # Mode. "enforce": the protection is on as installed -- scanners, floods,
@@ -67,6 +67,11 @@ expect GET /adminui/user/megamenu/setup                       json-check by SITE
 # monitor-...), write "set mode monitor"; "set mode off" switches it off.
 # --------------------------------------------------------------------------
 set         mode enforce
+
+# An Exponential site is no WordPress: its addresses (/wp-admin, /wp-login.php, xmlrpc.php, wp-content ...) are
+# asked for by scanners only. The library's @wordpress set refuses them (404) before the kernel starts.
+include     @wordpress
+expect GET /wp-admin                                       404 by WP-FOLDERS
 
 # --------------------------------------------------------------------------
 # Where the shield writes: relative paths are relative to this file. From

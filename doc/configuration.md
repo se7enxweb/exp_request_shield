@@ -61,8 +61,8 @@ siteaccess matching by host), the site's main file is built like this:
 ```
 include exponential.rules                 # first: it sets a mode, a store and a log of its own
 set mode enforce                          # the site's settings after it, so they win
-set store-dir /var/www/site/var/request-shield/store   # absolute paths: with a site block,
-set log       /var/www/site/var/request-shield/log/shield.log   # relative ones are not honored
+set store-dir ../../var/request-shield/store          # relative to this file, or absolute
+set log       ../../var/request-shield/log/shield.log
 ...
 include exponential-admin-host.rules      # last: it opens the admin's site block
 ```
