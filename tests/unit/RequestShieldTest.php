@@ -150,6 +150,35 @@ class RequestShieldTest extends PHPUnit\Framework\TestCase
         $this->assertSame( 4, array_sum( array_column( $a['buckets'], 'total' ) ) );
     }
 
+    public function testBrowserChecksAreCountedAsSentAndPassed()
+    {
+        $dir = __DIR__ . '/../.tmp-checks-' . getmypid();
+        @mkdir( $dir );
+        $log = $dir . '/shield.log';
+        $now = gmmktime( 12, 30, 0, 11, 12, 2026 );
+        $line = function ( $t, $action, $status, $reason ) {
+            return gmdate( 'Y-m-d\TH:i:sP', $t ) . " 198.51.100.0/24 $action $status \"$reason\" \"GET https://www.example.org/\" \"Agent\"\n";
+        };
+        file_put_contents( $log,
+            $line( $now - 30 * 3600, 'challenge', 429, 'challenge' ) .                   // before the period
+            $line( $now - 600, 'challenge', 429, 'challenge' ) .
+            $line( $now - 500, 'challenge', 429, 'challenge' ) .
+            $line( $now - 400, 'challenge', 429, 'challenge' ) .
+            $line( $now - 300, 'allow-uncached', 200, 'challenge solved' ) .
+            $line( $now - 200, 'allow-uncached', 200, 'not cacheable' ) .                 // not a passed check
+            $line( $now - 100, 'allow', 200, 'challenge solved' ) );                      // only allow-uncached sets the pass
+        try
+        {
+            $a = expRequestShield::activity( $log, 24, 0, $now );
+        }
+        finally
+        {
+            @unlink( $log );
+            @rmdir( $dir );
+        }
+        $this->assertSame( array( 'sent' => 3, 'passed' => 1 ), $a['checks'] );
+    }
+
     public function testTheChartStacksTheGroupsInsideTheViewBox()
     {
         $buckets = array(

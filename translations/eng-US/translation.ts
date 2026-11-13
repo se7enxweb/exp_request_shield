@@ -92,6 +92,14 @@
         <translation>Log lines, last %hours h</translation>
     </message>
     <message>
+        <source>Browser checks passed</source>
+        <translation>Browser checks passed</translation>
+    </message>
+    <message>
+        <source>Checks a browser passed; the rest were never answered, mostly by bots</source>
+        <translation>Checks a browser passed; the rest were never answered, mostly by bots</translation>
+    </message>
+    <message>
         <source>Main rule file</source>
         <translation>Main rule file</translation>
     </message>

@@ -86,6 +86,9 @@
     {foreach $rs_group_names as $rs_group => $rs_name}
     <li class="a4-figure a4-rs-figure is-{$rs_group}"><strong>{$activity.groups[$rs_group]}</strong><span>{$rs_name|wash}</span></li>
     {/foreach}
+    {* How many of the browser checks above (the checked group) a browser passed; the rest were never answered,
+       mostly by bots *}
+    <li class="a4-figure" title="{'Checks a browser passed; the rest were never answered, mostly by bots'|i18n( 'extension/exp_request_shield' )|wash}"><strong>{$activity.checks.passed}</strong><span>{'Browser checks passed'|i18n( 'extension/exp_request_shield' )}{if gt( $activity.checks.sent, 0 )} ({$activity.checks.passed|mul( 100 )|div( $activity.checks.sent )|round} %){/if}</span></li>
 </ul>
 
 <section class="a4-section" aria-labelledby="rs-chart-title">

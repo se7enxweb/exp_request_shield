@@ -511,6 +511,9 @@ class expRequestShield
      * What the log says for the last $hours hours: counts by action and by
      * rule, one bucket per hour for the chart, and the newest lines. Reads
      * only the end of the log and the rotated one (LogStats does the same).
+     * 'checks' counts the browser checks sent (action challenge) and passed
+     * (allow-uncached, reason "challenge solved": the answer that sets the
+     * pass); the difference is mostly clients that never answer, such as bots.
      *
      * @param string|null $logFile
      * @param int $hours
@@ -529,6 +532,7 @@ class expRequestShield
             $buckets[$t] = array( 'time' => $t, 'refused' => 0, 'checked' => 0, 'watched' => 0, 'other' => 0, 'total' => 0 );
 
         $out = array( 'hours' => $hours, 'since' => $since, 'lines' => 0, 'actions' => array(), 'groups' => array( 'refused' => 0, 'checked' => 0, 'watched' => 0, 'other' => 0 ),
+                      'checks' => array( 'sent' => 0, 'passed' => 0 ),
                       'rules' => array(), 'recent' => array(), 'buckets' => array(), 'max' => 0, 'readable' => false );
         if ( !$logFile || !self::loadLibrary() )
         {
@@ -545,6 +549,10 @@ class expRequestShield
             $group = self::group( $e['action'] );
             $out['actions'][$e['action']] = ( isset( $out['actions'][$e['action']] ) ? $out['actions'][$e['action']] : 0 ) + 1;
             $out['groups'][$group]++;
+            if ( $e['action'] === 'challenge' )
+                $out['checks']['sent']++;
+            elseif ( $e['action'] === 'allow-uncached' && $e['reason'] === 'challenge solved' )
+                $out['checks']['passed']++;
             if ( $e['rule'] !== null )
             {
                 $r = isset( $out['rules'][$e['rule']] ) ? $out['rules'][$e['rule']] : array( 'rule' => $e['rule'], 'count' => 0, 'last' => 0 );

@@ -92,6 +92,14 @@
         <translation>Protokollzeilen, letzte %hours Std.</translation>
     </message>
     <message>
+        <source>Browser checks passed</source>
+        <translation>Browser-Checks bestanden</translation>
+    </message>
+    <message>
+        <source>Checks a browser passed; the rest were never answered, mostly by bots</source>
+        <translation>Checks, die ein Browser bestanden hat; die übrigen wurden nie beantwortet, meist von Bots</translation>
+    </message>
+    <message>
         <source>Main rule file</source>
         <translation>Hauptregeldatei</translation>
     </message>

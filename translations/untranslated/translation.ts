@@ -92,6 +92,14 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
+        <source>Browser checks passed</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Checks a browser passed; the rest were never answered, mostly by bots</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <source>Main rule file</source>
         <translation type="unfinished"></translation>
     </message>
