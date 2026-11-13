@@ -11,7 +11,7 @@ class exp_request_shieldInfo
     {
         return array(
             'Name' => '<a href="https://github.com/se7enxweb/exp_request_shield">Exponential Request Shield</a>',
-            'Version' => "0.0.1.2",
+            'Version' => "0.0.1.3",
             'Copyright' => 'Copyright (C) 1998 - 2026 Exponential Foundation and 7x. All rights reserved. request-shield: Copyright (C) 2026 JAC Systeme GmbH (CJW Network)',
             'License' => 'GNU General Public License v2.0 (or any later version)',
             'Info_url' => 'https://github.com/se7enxweb/exp_request_shield',

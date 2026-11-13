@@ -15,7 +15,7 @@ sudo -u <web user> php extension/exp_request_shield/bin/request-shield <command>
 | `test <main.rules>` | decides every `expect` example next to the rules; run after every change |
 | `trace <main.rules> "GET https://www.example.org/path"` | how one request is decided, rule by rule |
 | `show <main.rules>` | the compiled settings |
-| `crawlers <main.rules> update` | fetches the address lists the search engines publish |
+| `crawlers <main.rules> update` | fetches the address lists the search engines publish (the cronjob part `requestshield` does it daily) |
 | `access-token <main.rules> '*'` | makes a token for the library's own pages ([dashboard.md](dashboard.md)) |
 | `deny`, `allow`, `unlist`, `lists` | the site's deny and allow lists, with an end date |
 | `stats <main.rules> --days=7` | the statistics on the command line (`set stats on`) |

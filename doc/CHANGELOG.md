@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.0.1.3
+
+- Updated: The default rules say out loud that search engines and AI crawlers are welcome (`crawlers search`,
+  `ai-search`, `ai-user` and `ai-training` `allow`, the library's default): a crawler verified by its operator's
+  published address list or by DNS never gets the browser check; one that only sends the name is treated like any
+  visitor. Examples prove both for Googlebot.
+- Added: The default rules deny two public blocklists, Spamhaus DROP (hijacked and criminal networks) and abuse.ch
+  Feodo (botnet command servers).
+- Added: The cronjob part `requestshield` (daily at 04:23, written into the crontab by the kernel's crontab
+  installer): fetches the blocklists the rules name (`request-shield feeds update`) and the crawlers' published
+  address lists (`request-shield crawlers update`), so feed rules and crawler verification stay current. The
+  library's command line runs as a process of its own, since it ends with exit().
+
 ## 0.0.1.2
 
 - Updated: The default rules include the library's `@wordpress` set: an Exponential site is no WordPress, so

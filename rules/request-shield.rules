@@ -16,7 +16,7 @@
 # the included exponential*.rules are request-shield's, under its MIT License (LICENSE.md).
 
 ids SITE
-version 0.0.1.2
+version 0.0.1.3
 
 # The Exponential rules of the library (examples/exponential/, copied unchanged):
 # the frontend (exponential.rules) and the admin as the siteaccess /admin.
@@ -72,6 +72,24 @@ set         mode enforce
 # asked for by scanners only. The library's @wordpress set refuses them (404) before the kernel starts.
 include     @wordpress
 expect GET /wp-admin                                       404 by WP-FOLDERS
+
+# Search engines and AI crawlers are welcome: Google, Bing, Apple, DuckDuckGo and the AI crawlers whose operators
+# publish how to verify them (OpenAI, Anthropic, Perplexity ...). A crawler counts as verified only by where it comes
+# from (its operator's published address list, or reverse and forward DNS), never by the name it sends; a verified
+# crawler never gets the browser check (it runs no JavaScript), only the pace limits. One that merely sends the name
+# is treated like any visitor. These lines say the library's default out loud; write "block" for a kind you do not want.
+crawlers    search       allow
+crawlers    ai-search    allow
+crawlers    ai-user      allow
+crawlers    ai-training  allow
+expect GET /user/login ua "Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)" from 66.249.66.1   answered   # the real Googlebot: no browser check
+expect GET /user/login ua "Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)" from 198.51.100.7  check by EXP-LOGIN   # the name alone: checked like anyone
+
+# Public blocklists of networks nobody should hear from: hijacked or criminal networks (Spamhaus DROP) and botnet
+# command servers (abuse.ch Feodo). Fetched by the extension's cronjob part (requestshield, daily); until the first
+# fetch they decide nothing.
+feed spamhaus-drop deny
+feed feodo deny
 
 # --------------------------------------------------------------------------
 # Where the shield writes: relative paths are relative to this file. From
