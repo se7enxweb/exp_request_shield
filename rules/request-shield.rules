@@ -16,13 +16,48 @@
 # the included exponential*.rules are request-shield's, under its MIT License (LICENSE.md).
 
 ids SITE
-version 0.0.1.0
+version 0.0.1.1
 
 # The Exponential rules of the library (examples/exponential/, copied unchanged):
 # the frontend (exponential.rules) and the admin as the siteaccess /admin.
-# For an admin on a host of its own (admin.example.org) include
-# exponential-admin-host.rules instead.
+# They come first: exponential.rules sets a mode, a store and a log of its own,
+# and the settings below must come after it to win.
 include     exponential-admin-uri.rules
+
+# A default installation has more admin siteaccesses than /admin: adminui
+# (exp_adminui), editor, and older admin designs. The same rules as the
+# library's "match /admin/**" for them.
+match regex ^/(adminui|editor|admin2|admin3|admin4|admin4l|admintest_[a-z0-9_]+)(/|$) {
+  [SITE-ADMIN-SYS]   unblock [EXP-SYSVIEW] [EXP-MODULES]       # the admin siteaccesses use system URLs and admin modules
+  expect GET /adminui/content/view/full/2 with pass        answered
+  expect GET /editor/content/view/full/2 with pass         answered
+  expect GET /adminui/setup/info with pass                 answered
+  [SITE-ADMIN-POST]  allow POST                               # editors save everywhere in the admin
+  expect POST /editor/content/edit/87/1/eng-GB with pass   answered
+  [SITE-ADMIN-CHECK] challenge                                # every editor: the browser check once per pass
+  expect GET /adminui/dashboard                            check
+  [SITE-ADMIN-AREA]  backend                                  # counted apart in the statistics
+  [SITE-ADMIN-Q]     query * text                             # all parameters known, free text scanned for attacks
+  expect GET /adminui/content/edit/87?anything=goes with pass   answered
+}
+expect GET /adminuix/content/view/full/2                  404 by EXP-SYSVIEW   # a frontend address that only starts like one
+expect GET /setup/info                                     404 by EXP-MODULES   # admin modules stay closed in the frontend
+[SITE-ADMIN-BG] api-path regex ^/(adminui|editor|admin2|admin3|admin4|admin4l|admintest_[a-z0-9_]+)/user/megamenu/   # the admin's background fragments: the check as JSON, never the page
+expect GET /adminui/user/megamenu/setup with pass                 answered
+expect GET /adminui/user/megamenu/setup header X-Requested-With:XMLHttpRequest   json-check by SITE-ADMIN-CHECK
+expect GET /adminui/user/megamenu/setup                       json-check by SITE-ADMIN-CHECK   # also without the fetch headers
+
+# AN ADMIN ON A HOST OF ITS OWN (edit.example.org, siteaccess matching by host):
+# the rules above cover admins reached by path only. On such a site, make the
+# site's own file (settings/request-shield/request-shield.rules) like this --
+# exponential.rules first, the settings after it, the admin host's site block
+# last (after the first site block only further site blocks may follow):
+#   include exponential.rules
+#   ... the settings of this file (mode, store-dir, log, ...) ...
+#   include exponential-admin-host.rules   (a copy, with "site admin.example.org"
+#                                            replaced by the admin's host names, and
+#                                            its own "include exponential.rules" removed)
+# and give store-dir and log as absolute paths there. See doc/configuration.md.
 
 # --------------------------------------------------------------------------
 # Mode. "enforce": the protection is on as installed -- scanners, floods,
@@ -54,6 +89,10 @@ set         stats off
 # for its addresses ("restrict /rs/** to 192.0.2.10") or with a login token
 # ("dashboard-access * sha256:...", made by bin/request-shield access-token).
 # The admin's Setup > Request shield page needs none of this.
+# In monitor mode a restrict refuses nobody: the JSON API stays off, and a site
+# that opens these pages gives them a login (dashboard-access), which is checked
+# in every mode.
 [SITE-DASH]  restrict /rs/** to 127.0.0.1 ::1
+set         api off
 expect GET /rs/stats/overview from 198.51.100.27 403 by SITE-DASH    # the shield's own pages, from outside
 expect GET /rs/stats/overview from 127.0.0.1 answered                 # from the server itself

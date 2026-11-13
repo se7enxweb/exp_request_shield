@@ -11,7 +11,10 @@ Exponential:
 | `/rs/api/v1/...` | the JSON API the pages read | |
 
 The extension's default rule file closes them to everyone but the server
-(`[SITE-DASH] restrict /rs/** to 127.0.0.1 ::1`). To open them:
+(`[SITE-DASH] restrict /rs/** to 127.0.0.1 ::1`) and keeps the JSON API off
+(`set api off`). **A `restrict` refuses nobody in monitor mode**: a site in monitor
+mode, or one that opens the pages, needs the login below, which is checked in every
+mode. To open them:
 
 - **For your addresses**: `restrict /rs/** to 192.0.2.10 2001:db8::/48`.
 - **With a login**: make a token with

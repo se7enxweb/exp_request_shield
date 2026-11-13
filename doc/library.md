@@ -20,12 +20,20 @@ examples) and `trace` give the same results on PHP 7.4, 8.0, 8.1, 8.2, 8.3, 8.4
 and 8.5, and under a web server (PHP's built-in server) the same requests get the
 same answers on all seven.
 
+The files keep the library's own names, with the suffix `.php`: Exponential Velocity
+turns `exit()` into its exit signal only in included `*.php` files, so under another
+suffix every refusal would end the worker. Both builds declare the same classes, so
+the folder must stay out of the kernel's autoload array: Exponential 6.0.15's root
+`.autoloadignore` lists `extension/exp_request_shield/lib`; on an older kernel, add
+that line (the extension loads its build itself, never through the autoloader).
+
 Each file is built, unchanged, by the library's own `build/single-file.php`
 from the release tag, so `Shield::BUILD` names the tag:
 
 | exp_request_shield | request-shield | Build |
 |---|---|---|
 | 0.0.1.0 | 0.4.0 (tag v0.4.0) | `v0.4.0` |
+| 0.0.1.1 | 0.4.0 (tag v0.4.0) | `v0.4.0` |
 
 ## Updating it
 

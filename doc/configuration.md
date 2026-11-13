@@ -52,6 +52,26 @@ set log-level flag                                   # refused, checked or would
 expect GET /rs/stats/overview from 198.51.100.27 403 by SITE-DASH
 ```
 
+### An admin on a host of its own
+
+The default covers admins reached by a path (`/admin`, `/adminui`, `/editor`,
+`/admin4` ...). When the admin has a host name of its own (`edit.example.org`,
+siteaccess matching by host), the site's main file is built like this:
+
+```
+include exponential.rules                 # first: it sets a mode, a store and a log of its own
+set mode enforce                          # the site's settings after it, so they win
+set store-dir /var/www/site/var/request-shield/store   # absolute paths: with a site block,
+set log       /var/www/site/var/request-shield/log/shield.log   # relative ones are not honored
+...
+include exponential-admin-host.rules      # last: it opens the admin's site block
+```
+
+with `exponential-admin-host.rules` a copy whose `site admin.example.org {` names
+the admin's host names (`site edit.example.org admin.example.org {`) and whose own
+`include exponential.rules` line is removed. After the first `site` block only
+further `site` blocks, `include`, `ids` and `version` may follow.
+
 The three `exponential*.rules` are copied next to the site's main file: an
 `include` may not leave its directory with `..`. After an update of the
 extension, compare them with `extension/exp_request_shield/rules/`.

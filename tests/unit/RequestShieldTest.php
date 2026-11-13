@@ -73,6 +73,26 @@ class RequestShieldTest extends PHPUnit\Framework\TestCase
         }
     }
 
+    /**
+     * The library files end in .php: Exponential Velocity turns exit() into its exit signal only in included *.php
+     * files; under another suffix a refusal ends the worker (2026-11-12, an .inc build answered 502).
+     */
+    public function testTheLibraryFilesKeepThePhpSuffix()
+    {
+        foreach ( expRequestShield::LIBRARY_FILES as $file )
+            $this->assertStringEndsWith( '.php', $file );
+    }
+
+    /** The default rules cover every admin siteaccess of a default installation, and keep the JSON API off. */
+    public function testTheDefaultRulesCoverTheAdminSiteaccessesAndKeepTheApiOff()
+    {
+        $rules = file_get_contents( self::ext() . '/rules/request-shield.rules' );
+        foreach ( array( 'adminui', 'editor', 'admin4l' ) as $siteaccess )
+            $this->assertMatchesRegularExpression( '/^match regex .*\\b' . $siteaccess . '\\b/m', $rules );
+        $this->assertMatchesRegularExpression( '/^set\\s+api\\s+off\\b/m', $rules );
+        $this->assertLessThan( strpos( $rules, 'set         mode' ), strpos( $rules, 'include     exponential-admin-uri.rules' ), 'the Exponential rules come before the settings' );
+    }
+
     public function testTheVersionIsTheSameEverywhere()
     {
         $ext = self::ext();

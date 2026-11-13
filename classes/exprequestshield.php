@@ -29,9 +29,14 @@
 class expRequestShield
 {
     /** The extension's version, as in ezinfo.php and extension.xml. */
-    const VERSION = '0.0.1.0';
+    const VERSION = '0.0.1.1';
 
-    /** The library files, in the order they must be loaded: the core first, the API before the firewall pages. */
+    /**
+     * The library files, in the order they must be loaded: the core first, the API before the firewall pages. They
+     * keep the suffix .php: Exponential Velocity turns exit() into its exit signal only in included *.php files, so
+     * under another suffix a refusal would end the worker (a 502). The kernel's .autoloadignore keeps the folder out of
+     * the autoload array (both builds declare the same classes).
+     */
     const LIBRARY_FILES = array( 'request-shield.php', 'request-shield-stats.php', 'request-shield-api.php', 'request-shield-waf.php', 'request-shield-cache.php' );
 
     /** The file whose presence in the var directory switches the shield off without touching config.php. */
