@@ -1,5 +1,15 @@
 # Changelog
 
+## Not released yet
+
+- Updated: The default rules give images a budget of their own (`EXP-IMAGES`, 3000 a minute per visitor, then the
+  browser check) and leave them out of the pace (`EXP-PACE`, still the check past 120 pages a minute). Exponential
+  6.0.15 makes image aliases on demand: a page with hundreds of new images asks `content/image`, or
+  `index_image.php` for a storage image that is not there yet, once per image, and the pace counted each of those
+  as a page view, so a page of 500 new images got a few hundred answers 429 and never finished loading. The default
+  budget `requests` is switched off (`no-limit requests`) and the pace is the budget `pages`. A site rule file that
+  restated the pace the same way (a `limit pages` of its own) must drop it when it takes this copy.
+
 ## 0.0.1.3
 
 - Updated: The default rules say out loud that search engines and AI crawlers are welcome (`crawlers search`,
