@@ -212,4 +212,26 @@ class RequestShieldTest extends PHPUnit\Framework\TestCase
         $this->assertSame( 0, $code, implode( "\n", $test ) );
         $this->assertMatchesRegularExpression( '/^\d+ examples: \d+ pass\.$/', end( $test ) );
     }
+    public function testTheInstallationsOwnRequestsPassWithAValidSignature()
+    {
+        $now = 1763100000;
+        $line = expRequestShield::selfHeader( 'https://doc.example.org/exphelp/viewer/help/start.md?x=1', 'GET', $now );
+        $this->assertNotNull( $line, 'the key is made on first use' );
+        $this->assertMatchesRegularExpression( '/^X-Exp-Self: ' . $now . '\.[0-9a-f]{64}$/', $line );
+        $server = array( 'HTTP_X_EXP_SELF' => substr( $line, strlen( 'X-Exp-Self: ' ) ), 'HTTP_HOST' => 'doc.example.org',
+                         'REQUEST_URI' => '/exphelp/viewer/help/start.md?x=1', 'REQUEST_METHOD' => 'GET' );
+        $this->assertTrue( expRequestShield::isOwnRequest( $server, $now + 5 ) );
+        $this->assertTrue( expRequestShield::isOwnRequest( array( 'HTTP_HOST' => 'doc.example.org:443' ) + $server, $now ), 'a port in Host is left out' );
+
+        // anything else is a visitor like any other
+        $this->assertFalse( expRequestShield::isOwnRequest( array( 'REQUEST_URI' => '/admin/setup/info' ) + $server, $now ), 'another address' );
+        $this->assertFalse( expRequestShield::isOwnRequest( array( 'REQUEST_METHOD' => 'POST' ) + $server, $now ), 'another method' );
+        $this->assertFalse( expRequestShield::isOwnRequest( array( 'HTTP_HOST' => 'evil.example' ) + $server, $now ), 'another host' );
+        $this->assertFalse( expRequestShield::isOwnRequest( $server, $now + expRequestShield::SELF_TTL + 1 ), 'too old' );
+        $this->assertFalse( expRequestShield::isOwnRequest( array( 'HTTP_X_EXP_SELF' => $now . '.' . str_repeat( 'a', 64 ) ) + $server, $now ), 'a made-up signature' );
+        $this->assertFalse( expRequestShield::isOwnRequest( array( 'HTTP_X_EXP_SELF' => ( $now + 1 ) . substr( $server['HTTP_X_EXP_SELF'], strlen( (string)$now ) ) ) + $server, $now ), 'another time' );
+        unset( $server['HTTP_X_EXP_SELF'] );
+        $this->assertFalse( expRequestShield::isOwnRequest( $server, $now ), 'no header' );
+        $this->assertNull( expRequestShield::selfHeader( '/no/host' ), 'an address without a host is not signed' );
+    }
 }

@@ -29,7 +29,7 @@
 class expRequestShield
 {
     /** The extension's version, as in ezinfo.php and extension.xml. */
-    const VERSION = '0.0.1.4';
+    const VERSION = '0.0.1.5';
 
     /**
      * The library files, in the order they must be loaded: the core first, the API before the firewall pages. They
@@ -151,7 +151,8 @@ class expRequestShield
      */
     public static function protect()
     {
-        if ( self::isPaused() || !self::loadLibrary() )
+        // the installation's own requests (the preloader, the checks after an upgrade, static publishing) pass
+        if ( self::isPaused() || self::isOwnRequest() || !self::loadLibrary() )
             return;
         $file = self::ruleFile();
         if ( !is_file( $file ) )
@@ -225,6 +226,109 @@ class expRequestShield
         }, null, $shield );
         $decide();
         return true;
+    }
+
+    /** The request header that marks a request the installation makes to one of its own pages */
+    const SELF_HEADER = 'X-Exp-Self';
+
+    /** Seconds a signed own request stays valid (the clocks of one server: the margin covers a slow redirect) */
+    const SELF_TTL = 120;
+
+    /**
+     * The key the installation signs its own requests with, made on first use in the cache directory: 64 hex
+     * characters, readable by the site's user only. Made by root (Velocity, a console run as root), it is handed
+     * to the owner of the directory, so the web server's PHP reads the same key.
+     *
+     * @param bool $create false: only read it
+     * @return string|null null when there is none and it cannot be made
+     */
+    public static function selfKey( $create = true )
+    {
+        $file = self::cacheDir() . '/self.key';
+        $key = is_file( $file ) ? trim( (string)@file_get_contents( $file ) ) : '';
+        if ( preg_match( '/^[0-9a-f]{64}$/', $key ) )
+            return $key;
+        if ( !$create || ( !is_dir( dirname( $file ) ) && !@mkdir( dirname( $file ), 0750, true ) ) )
+            return null;
+        $key = bin2hex( random_bytes( 32 ) );
+        $tmp = $file . '.' . getmypid() . '.tmp';
+        if ( @file_put_contents( $tmp, $key ) !== 64 || !@chmod( $tmp, 0600 ) )
+        {
+            @unlink( $tmp );
+            return null;
+        }
+        if ( function_exists( 'posix_geteuid' ) && posix_geteuid() === 0 )
+        {
+            $owner = @fileowner( dirname( $file ) );
+            $group = @filegroup( dirname( $file ) );
+            if ( $owner !== false )
+                @chown( $tmp, $owner );
+            if ( $group !== false )
+                @chgrp( $tmp, $group );
+        }
+        if ( !@rename( $tmp, $file ) )
+        {
+            @unlink( $tmp );
+            return null;
+        }
+        return $key;
+    }
+
+    /**
+     * The header line that lets a request the installation makes to one of its own pages pass the shield
+     * ("X-Exp-Self: <time>.<signature>"): Setup > Preload sites, the address checks after an upgrade, static
+     * publishing. Without it the pace limit answered them with the browser check, which no script passes. The
+     * signature (HMAC-SHA256 with selfKey()) covers the time, the method, the host and the path with its query, and
+     * holds SELF_TTL seconds; only the installation knows the key.
+     *
+     * @param string $url the address asked for
+     * @param string $method
+     * @param int|null $now
+     * @return string|null the header line, null without a key or for an address without a host
+     */
+    public static function selfHeader( $url, $method = 'GET', $now = null )
+    {
+        $parts = parse_url( (string)$url );
+        if ( !is_array( $parts ) || empty( $parts['host'] ) )
+            return null;
+        $key = self::selfKey();
+        if ( $key === null )
+            return null;
+        $target = ( isset( $parts['path'] ) && $parts['path'] !== '' ? $parts['path'] : '/' ) . ( isset( $parts['query'] ) ? '?' . $parts['query'] : '' );
+        $time = $now === null ? time() : (int)$now;
+        return self::SELF_HEADER . ': ' . $time . '.' . self::selfSignature( $key, $time, $method, $parts['host'], $target );
+    }
+
+    /**
+     * Whether this request carries a valid own-request signature (selfHeader()): from SELF_TTL seconds ago at most,
+     * made with this installation's key for this method, host and address.
+     *
+     * @param array|null $server default $_SERVER
+     * @param int|null $now
+     * @return bool
+     */
+    public static function isOwnRequest( $server = null, $now = null )
+    {
+        $server = is_array( $server ) ? $server : $_SERVER;
+        $value = isset( $server['HTTP_X_EXP_SELF'] ) ? (string)$server['HTTP_X_EXP_SELF'] : '';
+        if ( !preg_match( '/^(\d{9,11})\.([0-9a-f]{64})$/', $value, $m ) )
+            return false;
+        $now = $now === null ? time() : (int)$now;
+        if ( abs( $now - (int)$m[1] ) > self::SELF_TTL )
+            return false;
+        $key = self::selfKey( false );
+        if ( $key === null )
+            return false;
+        $host = isset( $server['HTTP_HOST'] ) ? preg_replace( '/:\d+$/', '', (string)$server['HTTP_HOST'] ) : '';
+        $target = isset( $server['REQUEST_URI'] ) && $server['REQUEST_URI'] !== '' ? (string)$server['REQUEST_URI'] : '/';
+        $method = isset( $server['REQUEST_METHOD'] ) ? (string)$server['REQUEST_METHOD'] : 'GET';
+        return hash_equals( self::selfSignature( $key, (int)$m[1], $method, $host, $target ), $m[2] );
+    }
+
+    /** The signature of an own request */
+    private static function selfSignature( $key, $time, $method, $host, $target )
+    {
+        return hash_hmac( 'sha256', (int)$time . "\n" . strtoupper( (string)$method ) . "\n" . strtolower( (string)$host ) . "\n" . (string)$target, (string)$key );
     }
 
     /** The response headers so far, without the shield's diagnostics and cookies. */

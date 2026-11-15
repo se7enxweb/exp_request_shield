@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.0.1.5
+
+- Added: The installation's own requests pass: Setup > Preload sites, the address checks after an upgrade and static
+  publishing sign each request to the site's own pages (`X-Exp-Self`, an HMAC with a key only the installation has,
+  valid two minutes and only for that address), and `protect()` lets a signed request through before the shield
+  runs. Before, the pace limit answered the preloader with the browser check (429) after 120 pages, and the
+  upgrade's check of `/user/login` failed. Needs Exponential 6.0.15 from 2026-11-14 on (the kernel sends the header).
+
 ## 0.0.1.4
 
 - Updated: The admin rules let the layout editor (Exponential Layouts) save and discard drafts: `PUT`, `PATCH` and

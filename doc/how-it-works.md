@@ -23,6 +23,18 @@ before the HTTP cache's early exit, the autoloader, the INI files and the
 database. Every entry point that reads `config.php` (index.php, the REST and
 tree menu entry points, ezjscore calls) is covered.
 
+## The installation's own requests
+
+Setup > Preload sites, the address checks after an upgrade and static publishing ask the site's own pages, quickly
+and from the server's addresses, and the pace limit answered them with the browser check, which no script passes.
+They now sign each request: `expRequestShield::selfHeader()` gives a header `X-Exp-Self: <time>.<signature>`, an
+HMAC-SHA256 over the time, the method, the host and the path with its query, made with a key only the installation
+has (`var/request-shield/cache/self.key`, 64 hex characters, readable by the site's user only, made on first use).
+`protect()` lets a request with a valid signature pass before the shield runs (`isOwnRequest()`); a signature holds
+two minutes (`SELF_TTL`) and only for the address it was made for. Anyone else's request, from any address, is
+decided as before. The kernel's preloader (`expPreloadRunner::request()`, which static publishing uses too) and the
+upgrade's smoke check (`expUpgradeStepFinishSmoke::status()`) send it whenever the extension is installed.
+
 ## What it costs
 
 The settings are compiled from the rule files once, into
