@@ -1,7 +1,14 @@
 # Changelog
 
-## Not released yet
+## 0.0.1.4
 
+- Updated: The admin rules let the layout editor (Exponential Layouts) save and discard drafts: `PUT`, `PATCH` and
+  `DELETE` are allowed for the editor's API only (`EXP-ADMIN-SPA` below `/admin/explayouts_ui_api/`, `EXP-AH-SPA` on
+  an admin host), and refused everywhere else as before. Without them, "discard draft" in the editor answered
+  405 ("Something went wrong") on every site with the shield. A site's copy of the admin rules is written once,
+  when its rule file is made: take these two rules into it, or the new copy.
+- Added: The dashboard shows how many browser checks were passed (the answers that set a pass), next to how many
+  were sent, and the activity summary counts both.
 - Updated: The default rules give images a budget of their own (`EXP-IMAGES`, 3000 a minute per visitor, then the
   browser check) and leave them out of the pace (`EXP-PACE`, still the check past 120 pages a minute). Exponential
   6.0.15 makes image aliases on demand: a page with hundreds of new images asks `content/image`, or

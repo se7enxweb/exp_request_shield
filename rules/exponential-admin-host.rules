@@ -16,12 +16,18 @@ include     exponential.rules                                  # the frontend: s
 # On the visitors' host, /admin is no admin: a system URL like any other.
 expect GET https://www.example.org/admin/content/view/full/2   404 by EXP-SYSVIEW
 
+# The layout editor (Exponential Layouts) saves with PUT and PATCH and discards a draft with DELETE.
+method      GET HEAD POST OPTIONS PUT PATCH DELETE
+
 site admin.example.org {
   [EXP-AH-SYS]    unblock [EXP-SYSVIEW] [EXP-MODULES]         # the admin uses system URLs (/content/view/full/2) and its modules
   expect GET /content/view/full/2 with pass          answered
   expect GET /class/grouplist with pass               answered
   [EXP-AH-POST]   allow POST /**                              # editors save everywhere in the admin
   expect POST /class/edit/1 with pass               answered
+  [EXP-AH-SPA]    allow PUT PATCH DELETE /explayouts_ui_api/**   # the layout editor's API: PUT, PATCH and DELETE, nowhere else
+  expect DELETE /explayouts_ui_api/app/api/layouts/19/draft with pass   answered
+  expect DELETE /content/view/full/2 with pass       405   # anywhere else in the admin: still refused
   [EXP-AH-BG]     api-path /user/megamenu/**                  # the admin's background fragments (the mega menu): the check as JSON, never the page
   expect GET /user/megamenu/setup with pass           answered
   expect GET /user/megamenu/setup header X-Requested-With:XMLHttpRequest   json-check by EXP-AH-CHECK   # no pass: JSON, not the HTML check page
