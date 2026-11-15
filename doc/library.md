@@ -34,6 +34,7 @@ from the release tag, so `Shield::BUILD` names the tag:
 |---|---|---|
 | 0.0.1.0 | 0.4.0 (tag v0.4.0) | `v0.4.0` |
 | 0.0.1.1 | 0.4.0 (tag v0.4.0) | `v0.4.0` |
+| 0.0.1.2 to 0.0.1.6 | 0.4.0 (tag v0.4.0) | `v0.4.0` |
 
 ## Updating it
 

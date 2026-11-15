@@ -4,6 +4,10 @@ The shield is configured in **rule files**, plain text read by the library. It
 runs before the kernel, so it never reads an INI file; `requestshield.ini` only
 holds settings of the admin pages.
 
+This page explains where the rules live and how a site gets its own. Every rule
+line and setting with its default is in [reference.md](reference.md); recipes to
+copy, each with its examples, are in [cookbook.md](cookbook.md).
+
 ## Which main rule file is loaded
 
 The first that applies:

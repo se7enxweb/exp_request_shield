@@ -1,5 +1,27 @@
 # Changelog
 
+## 0.0.1.6
+
+- Added: A configuration reference, `doc/reference.md`: where the configuration lives, the constants, `requestshield.ini`
+  and the cronjob part, the files on disk, the rule file format, the order a request is checked in, every rule line and
+  every `set` key with its default and effect, every shipped Exponential rule by ID, the `expect` line, the log line
+  and the signed own requests.
+- Added: A cookbook, `doc/cookbook.md`: 26 recipes to copy, each with `expect` examples that `request-shield test`
+  passes against the shipped rules: host names and URI siteaccesses, the search, downloads and PDFs, help PDFs, login
+  and registration, forms of your own extensions, the REST API, the administration (office only, other admin
+  siteaccesses), webhooks, monitoring and uptime checks, signing your own scripts' requests (`selfHeader()`),
+  image-heavy pages and busy intranets, page aliases that look like system paths, print layouts and keyword lists,
+  query parameters, Cloudflare and other proxies, nginx, Apache, LiteSpeed and Velocity in front, several web servers,
+  shared hosting, a monitor mode rollout, bans, deny and allow lists, own texts and error pages, reading the log,
+  testing with `expect`, `trace` and `replay`, and refreshing the rule copies after an update.
+- Updated: `doc/troubleshooting.md` covers 429 for real visitors (what each log line means), 405 for forms, the REST
+  API and the layout editor, preloaders and own scripts, a proxy, CDN or second web server in front (nginx on the
+  same machine made every visitor `127.0.0.1`, which is exempt), shared hosting, a `replace` that counted everywhere,
+  and rule copies that an update does not change.
+- Updated: The README says what the shield does as installed, rule by rule, and what can be configured, with an
+  example; the default rule file `rules/request-shield.rules` ends with the cookbook's recipes, commented out. Its
+  rules are unchanged: the compiled settings are the same as in 0.0.1.5.
+
 ## 0.0.1.5
 
 - Added: The installation's own requests pass: Setup > Preload sites, the address checks after an upgrade and static

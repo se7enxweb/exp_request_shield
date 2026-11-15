@@ -5,6 +5,9 @@
 # (copy this file there, fix the paths below, and edit the copy; the extension's
 # files are replaced by every update). See doc/configuration.md.
 #
+# Every rule line and setting with its default: doc/reference.md. Recipes to copy, each with
+# its examples: doc/cookbook.md (and the commented recipes at the end of this file).
+#
 # Check after every edit:
 #   php extension/exp_request_shield/bin/request-shield check <main rule file>
 #   php extension/exp_request_shield/bin/request-shield test  <main rule file>
@@ -16,7 +19,7 @@
 # the included exponential*.rules are request-shield's, under its MIT License (LICENSE.md).
 
 ids SITE
-version 0.0.1.5
+version 0.0.1.6
 
 # The Exponential rules of the library (examples/exponential/, copied unchanged):
 # the frontend (exponential.rules) and the admin as the siteaccess /admin.
@@ -119,3 +122,97 @@ set         stats off
 set         api off
 expect GET /rs/stats/overview from 198.51.100.27 403 by SITE-DASH    # the shield's own pages, from outside
 expect GET /rs/stats/overview from 127.0.0.1 answered                 # from the server itself
+
+# ==========================================================================
+# RECIPES -- commented out; nothing below changes what the shield decides.
+# Copy a recipe into the site's own file (settings/request-shield/
+# request-shield.rules), take the "#" away, replace the documentation
+# addresses (192.0.2.x, 198.51.100.x, 203.0.113.x) and names, then run
+# "request-shield check" and "test". Each was tested against these rules;
+# doc/cookbook.md explains every one.
+# ==========================================================================
+
+# --- The site's names, and the admin modules behind every URI siteaccess ---
+#host        www.example.org example.org admin.example.org
+#replace     [EXP-MODULES] block regex (?i)^(/(site|ger|eng|fre))?/(setup|class|section|role|state|workflow|trigger|visual|package|infocollector|url|ezinfo|collaboration|pdf)(/|$)
+#expect GET /fre/setup/info                         404 by EXP-MODULES
+
+# --- A slower search server: five searches a minute (keep the "at", or every page counts) ---
+#replace     [EXP-SEARCHES] limit searches 5/min on-exceeded challenge at regex (?i)/content/(advanced)?search(/|$)
+#expect GET /content/search?SearchText=yoga  times 6   check by EXP-SEARCHES
+
+# --- Downloads (PDFs, office files, archives): 30 a minute per visitor, then the check ---
+#match /content/download/** {
+#  [SITE-DOWNLOADS] limit downloads 30/min on-exceeded challenge
+#  expect GET /content/download/12/34/file/report.zip  times 31   check
+#}
+# ... or the browser check before every PDF, once an hour (verified crawlers never get it):
+#[SITE-PDF-CHECK] challenge **/content/download/**/*.pdf max-age 1h
+
+# --- Help PDFs and the help search, when the help is public ---
+#match regex (?i)^(/[a-z0-9_]+)?/exphelp/(pdf|search)(/|$) {
+#  [SITE-HELP-HEAVY] limit helpheavy 10/min on-exceeded challenge
+#}
+
+# --- Ten registrations an hour per visitor ---
+#match /user/register/** {
+#  [SITE-REGISTER] limit registrations 10/hour on-exceeded challenge
+#}
+
+# --- The forms of an extension of your own (module "myforms") ---
+#[SITE-MYFORMS-POST]  allow POST **/myforms/**
+#[SITE-MYFORMS-CHECK] challenge POST **/myforms/** max-age 30m
+
+# --- The REST API: PUT, PATCH, DELETE there only, no browser check, a budget of its own ---
+#method      GET HEAD POST OPTIONS PUT PATCH DELETE
+#[SITE-REST-METHODS] allow PUT PATCH DELETE /api/**
+#[SITE-REST-NOCHECK] challenge-exempt /api/**
+#[SITE-REST-BUDGET]  limit api 300/min at /api/**
+
+# --- The administration only from the office (198.51.100.7: the address "test" sends its examples from) ---
+#[SITE-ADMIN-NET] restrict /admin/** to 192.0.2.0/24 2001:db8:10::/48 198.51.100.7
+#exempt      192.0.2.0/24                                       # the office: never counted, never checked
+
+# --- Webhooks posted by a provider's servers ---
+#[SITE-HOOK-POST]    allow POST /webhook/**
+#[SITE-HOOK-ORIGIN]  post-origin except /webhook/**
+#[SITE-HOOK-NOCHECK] challenge-exempt /webhook/**
+
+# --- An uptime monitor, with an end date ---
+#exempt      203.0.113.10 until 2027-12-31
+
+# --- A gallery site and a busy intranet (keep the "at regex", so pages and images count apart) ---
+#replace     [EXP-IMAGES] limit images 6000/min on-exceeded challenge at regex ^((/[a-z0-9_]+)?/content/image/|/index_image\.php|/var/([^/]+/)?storage/images(-versioned)?/)
+#replace     [EXP-PACE] limit pages 600/min challenge-at 240 on-exceeded challenge at regex ^(?!(/[a-z0-9_]+)?/content/image/|/index_image\.php|/var/([^/]+/)?storage/images(-versioned)?/)
+
+# --- A content section whose alias looks like a system path ---
+#[SITE-DOC]   unblock [EXP-INTERNAL] at /doc /doc/**
+
+# --- Print layouts (scanners wrap their paths in them) and keyword lists ---
+#[SITE-LAYOUT-SET] challenge **/layout/set/** max-age 12h
+#match regex (?i)/content/keyword(/|$) {
+#  [SITE-KEYWORDS] limit keywords 20/min on-exceeded challenge
+#}
+
+# --- Query parameters of an extension, with their types ---
+#[SITE-SHOP-Q] query sort word  page int  color list at /shop/**
+
+# --- Behind a proxy: name it, or every visitor seems to come from it ---
+#trust       10.0.0.0/8                                         # your load balancer
+#trust       127.0.0.1 ::1                                      # nginx in front on the same server (else: everyone is 127.0.0.1, which is exempt)
+# Cloudflare: its ranges from https://www.cloudflare.com/ips/, for example
+#trust       173.245.48.0/20 103.21.244.0/22 103.22.200.0/22 103.31.4.0/22 141.101.64.0/18 108.162.192.0/18 190.93.240.0/20 188.114.96.0/20 197.234.240.0/22 198.41.128.0/17 162.158.0.0/15 104.16.0.0/13 104.24.0.0/14 172.64.0.0/13 131.0.72.0/22
+#trust       2400:cb00::/32 2606:4700::/32 2803:f800::/32 2405:b500::/32 2405:8100::/32 2a06:98c0::/29 2c0f:f248::/32
+
+# --- Several web servers: one pass-cookie secret, one count ---
+#set         secret ${SHIELD_SECRET}
+#set         store file
+
+# --- Watch a new rule first; enforce a scanner ban (test it with --as-written) ---
+#[SITE-OLDAPI] monitor block /old-api/**
+#[SITE-BAN] ban after 20 refusals in 10m for 1h
+
+# --- Your own texts and error page ---
+#set         text.en.title One moment, please
+#set         text.de.title Einen Moment, bitte
+#set         error-page 404 errors/4xx.html
