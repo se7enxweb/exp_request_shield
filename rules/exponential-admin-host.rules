@@ -8,7 +8,7 @@
 # it with a Host header). Reasons: docs/use-cases/exponential.md.
 
 ids EXP
-version 2026-10-17.1
+version 2026-11-16.1
 
 include     exponential.rules                                  # the frontend: system URLs, forms, search, pace
 
@@ -23,6 +23,16 @@ site admin.example.org {
   [EXP-AH-SYS]    unblock [EXP-SYSVIEW] [EXP-MODULES]         # the admin uses system URLs (/content/view/full/2) and its modules
   expect GET /content/view/full/2 with pass          answered
   expect GET /class/grouplist with pass               answered
+  # Setup > Ini settings (/settings/view/admin/site.ini) is the settings module here, not the settings/ folder,
+  # and it and the template views are named after a file: EXP-INTERNAL and EXP-INI taken back there only.
+  [EXP-AH-SETTINGS] unblock [EXP-INTERNAL] at /settings/view/** /settings/edit/**
+  [EXP-AH-INI]    unblock [EXP-INI] at /settings/view/** /settings/edit/** /visual/templateview/** /visual/templateedit/** /visual/templatecreate/**
+  expect GET /settings/view/admin/site.ini with pass  answered
+  expect GET /settings/edit/admin/site.ini/DebugSettings/DebugOutput/siteaccess with pass   answered
+  expect GET /visual/templateview/node/view/full.tpl with pass   answered
+  expect GET /settings/site.ini with pass             404 by EXP-INTERNAL
+  expect GET /settings/override/site.ini.append.php with pass   404 by EXP-INTERNAL
+  expect GET /extension/shop/settings/shop.ini.append.php with pass   404 by EXP-INI
   [EXP-AH-POST]   allow POST /**                              # editors save everywhere in the admin
   expect POST /class/edit/1 with pass               answered
   [EXP-AH-SPA]    allow PUT PATCH DELETE /explayouts_ui_api/**   # the layout editor's API: PUT, PATCH and DELETE, nowhere else
@@ -40,4 +50,11 @@ site admin.example.org {
   expect GET /dashboard?anything=goes with pass       answered
   #[EXP-AH-NET]   restrict /** to 192.0.2.0/24                # the office only (or a VPN): take the "#" away
   set             pass-ttl 8h                                 # editors: one check a working day (visitors keep 2 hours)
+  # The editors' background calls (the layout editor's API, ezjscore) are not page views: a budget of their own.
+  no-limit        pages
+  [EXP-AH-PAGES]  limit ahpages 300/min challenge-at 120 on-exceeded challenge at regex ^(?!/content/image/|/index_image\.php|/var/([^/]+/)?storage/images(-versioned)?/|/explayouts_ui_api/app/api/|/ezjscore/call(/|$))
+  expect GET /dashboard with pass  times 301          check by EXP-AH-PAGES
+  [EXP-AH-API]    limit ahapi 1800/min challenge-at 900 on-exceeded challenge at regex ^/(explayouts_ui_api/app/api/|ezjscore/call(/|$))
+  expect GET /explayouts_ui_api/app/api/config with pass  times 400   answered   # an editor at work
+  expect GET /explayouts_ui_api/app/api/config with pass  times 1801  check by EXP-AH-API
 }

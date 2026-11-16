@@ -1,5 +1,20 @@
 # Changelog
 
+## Unreleased
+
+- Fixed: Setup > Ini settings and the template views work in the administration. `EXP-INI` (`*.ini`, `*.tpl`,
+  anywhere) refused `/admin/settings/view/admin/site.ini`, `/admin/settings/edit/...` and
+  `/admin/visual/templateview|templateedit|templatecreate/...` with 404: those are module views named after a file,
+  not the file. `EXP-ADMIN-INI` (admin as `/admin`) and `EXP-AH-INI` (admin on a host of its own) take the block back
+  at those paths only; on an admin host `EXP-AH-SETTINGS` also takes `EXP-INTERNAL` back for `/settings/view|edit/**`
+  (the settings module, not the `settings/` folder). Every other address named `.ini` or `.tpl` stays refused.
+- Fixed: The layout editor no longer meets the pace check while an editor works. Its API
+  (`/admin/explayouts_ui_api/app/api/...`) asks 10 to 30 times for one opening, one drag or one publish, and the
+  admin's ezjscore calls poll; counted as pages, `EXP-PACE` answered them 429 past 300 a minute and every call of the
+  editor failed. They are left out of `EXP-PACE` and counted by `EXP-ADMIN-API` (1800 a minute per visitor); on an
+  admin host `EXP-AH-PAGES` and `EXP-AH-API` do the same. A frontend's editor calls still count as pages. Sites that
+  copied the `replace [EXP-PACE]` recipe should take the new one.
+
 ## 0.0.1.6
 
 - Added: A configuration reference, `doc/reference.md`: where the configuration lives, the constants, `requestshield.ini`

@@ -18,7 +18,7 @@
 # "monitor" in front.
 
 ids EXP
-version 2026-11-14.1
+version 2026-11-16.1
 
 # --------------------------------------------------------------------------
 # 0. The site
@@ -174,9 +174,19 @@ expect GET /news/(offset)/20                       passes
 # addresses (same numbers), and the images have a budget of their own, sized
 # for a page of a few thousand new images.
 no-limit    requests                                           # the default budget counts every request; the pace below leaves the images out
-[EXP-PACE]      limit pages 300/min challenge-at 120 on-exceeded challenge at regex ^(?!(/[a-z0-9_]+)?/content/image/|/index_image\.php|/var/([^/]+/)?storage/images(-versioned)?/)   # per visitor: the check past 120 pages a minute, images left out
+# The administration's background calls are not page views either: the layout
+# editor (/admin/explayouts_ui_api/app/api/...) asks 10 to 30 times for one
+# opening, one drag or one publish, and the admin's ezjscore calls poll. As
+# pages, an editor at work met the check and every call of the editor failed
+# with 429. They count in a budget of their own (EXP-ADMIN-API), sized for
+# editors; in the admin, its browser check comes first anyway.
+[EXP-PACE]      limit pages 300/min challenge-at 120 on-exceeded challenge at regex ^(?!(/[a-z0-9_]+)?/content/image/|/index_image\.php|/var/([^/]+/)?storage/images(-versioned)?/|/admin/(explayouts_ui_api/app/api/|ezjscore/call(/|$)))   # per visitor: the check past 120 pages a minute, images and the admin's background calls left out
 expect GET /news  times 120                        answered
 expect GET /news  times 121                        check by EXP-PACE
+expect GET /explayouts_ui_api/app/api/config  times 121   check by EXP-PACE   # a frontend's editor calls: pages
+[EXP-ADMIN-API] limit adminapi 1800/min challenge-at 900 on-exceeded challenge at regex ^/admin/(explayouts_ui_api/app/api/|ezjscore/call(/|$))   # the admin's background calls: 1800 a minute per visitor
+expect GET /admin/explayouts_ui_api/app/api/config with pass  times 400   answered   # an editor at work
+expect POST /admin/ezjscore/call with pass  times 400           answered
 [EXP-IMAGES]    limit images 3000/min on-exceeded challenge at regex ^((/[a-z0-9_]+)?/content/image/|/index_image\.php|/var/([^/]+/)?storage/images(-versioned)?/)   # image aliases made on demand: 3000 a minute per visitor
 expect GET /content/image/abc/x.jpg  times 600     answered   # a page of 600 new images
 expect GET /eng/content/image/abc/x.jpg  times 600  answered  # behind a URI siteaccess

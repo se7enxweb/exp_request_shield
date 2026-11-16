@@ -319,7 +319,7 @@ An intranet where a whole office shares one address needs a faster pace (the shi
 pages a minute):
 
 ```
-replace     [EXP-PACE] limit pages 600/min challenge-at 240 on-exceeded challenge at regex ^(?!(/[a-z0-9_]+)?/content/image/|/index_image\.php|/var/([^/]+/)?storage/images(-versioned)?/)   # an intranet: twice the pace
+replace     [EXP-PACE] limit pages 600/min challenge-at 240 on-exceeded challenge at regex ^(?!(/[a-z0-9_]+)?/content/image/|/index_image\.php|/var/([^/]+/)?storage/images(-versioned)?/|/admin/(explayouts_ui_api/app/api/|ezjscore/call(/|$)))   # an intranet: twice the pace
 expect GET /news  times 240                        answered
 expect GET /news  times 241                        check by EXP-PACE
 ```

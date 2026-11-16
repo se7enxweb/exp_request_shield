@@ -183,7 +183,7 @@ expect GET /rs/stats/overview from 127.0.0.1 answered                 # from the
 
 # --- A gallery site and a busy intranet (keep the "at regex", so pages and images count apart) ---
 #replace     [EXP-IMAGES] limit images 6000/min on-exceeded challenge at regex ^((/[a-z0-9_]+)?/content/image/|/index_image\.php|/var/([^/]+/)?storage/images(-versioned)?/)
-#replace     [EXP-PACE] limit pages 600/min challenge-at 240 on-exceeded challenge at regex ^(?!(/[a-z0-9_]+)?/content/image/|/index_image\.php|/var/([^/]+/)?storage/images(-versioned)?/)
+#replace     [EXP-PACE] limit pages 600/min challenge-at 240 on-exceeded challenge at regex ^(?!(/[a-z0-9_]+)?/content/image/|/index_image\.php|/var/([^/]+/)?storage/images(-versioned)?/|/admin/(explayouts_ui_api/app/api/|ezjscore/call(/|$)))
 
 # --- A content section whose alias looks like a system path ---
 #[SITE-DOC]   unblock [EXP-INTERNAL] at /doc /doc/**

@@ -320,19 +320,25 @@ never edit the copies, so they can be refreshed.
 | `EXP-SEARCH-Q` | `query SearchText text ... SearchDate /-1\|[1-5]/ ...` | the search form's parameters and their types |
 | `EXP-CACHE-Q` | `cache-query none` | a cache keeps addresses without a query only |
 | `EXP-SEARCH-CHECK` | `challenge **/content/search **/content/advancedsearch max-age 1h` | commented out: take the `#` away while a search is attacked |
-| `EXP-PACE` | `limit pages 300/min challenge-at 120 on-exceeded challenge at regex ^(?!...images...)` | the pace: the check past 120 pages a minute and again past 300, image addresses left out |
+| `EXP-PACE` | `limit pages 300/min challenge-at 120 on-exceeded challenge at regex ^(?!...images...\|/admin/(explayouts_ui_api/app/api/\|ezjscore/call))` | the pace: the check past 120 pages a minute and again past 300, image addresses and the admin's background calls left out |
+| `EXP-ADMIN-API` | `limit adminapi 1800/min challenge-at 900 on-exceeded challenge at regex ^/admin/(explayouts_ui_api/app/api/\|ezjscore/call)` | the admin's background calls (the layout editor's API, ezjscore): 1800 a minute |
 | `EXP-IMAGES` | `limit images 3000/min on-exceeded challenge at regex ^(...content/image/\|/index_image.php\|...storage/images...)` | image aliases made on demand: 3000 a minute |
 | `EXP-BAN` | `monitor ban after 10 refusals in 10m for 1h` | a scanner an hour off the site; watched only |
 | `EXP-STRICT` | `monitor query strict` | unknown query parameters: 404; watched only |
 
 **The admin as `/admin`** (`exponential-admin-uri.rules`): `EXP-ADMIN-BG` (`api-path /admin/user/megamenu/**`),
 the `method` line with `PUT PATCH DELETE`, `EXP-ADMIN-SPA` (`allow PUT PATCH DELETE /admin/explayouts_ui_api/**`, the
-layout editor), and in `match /admin/**`: `EXP-ADMIN-SYS` (system URLs and admin modules open), `EXP-ADMIN-POST`
+layout editor), `EXP-ADMIN-INI` (`unblock [EXP-INI]` at `/admin/settings/view|edit/**` and
+`/admin/visual/templateview|templateedit|templatecreate/**`: Setup > Ini settings and the template views, module views
+named after a file), and in `match /admin/**`: `EXP-ADMIN-SYS` (system URLs and admin modules open), `EXP-ADMIN-POST`
 (`allow POST`), `EXP-ADMIN-CHECK` (`challenge`: the browser check once per pass), `EXP-ADMIN-AREA` (`backend`),
 `EXP-ADMIN-Q` (`query * text`) and the commented `EXP-ADMIN-NET` (`restrict to <office>`).
 
 **The admin on a host of its own** (`exponential-admin-host.rules`): the same as `EXP-AH-*` rules in
-`site admin.example.org { ... }`, with `set pass-ttl 8h` for editors.
+`site admin.example.org { ... }`, with `set pass-ttl 8h` for editors; `EXP-AH-SETTINGS` and `EXP-AH-INI` take
+`EXP-INTERNAL` and `EXP-INI` back for `/settings/view|edit/**` and the template views, and the host's pace is
+`EXP-AH-PAGES` (`limit ahpages`, the editor's API and ezjscore left out) with `EXP-AH-API` (`limit ahapi 1800/min`) for
+those calls.
 
 **The default main file** (`request-shield.rules`): `SITE-ADMIN-*` for the other admin siteaccesses (`/adminui`,
 `/editor`, `/admin2` to `/admin4l`, `/admintest_*`), `include @wordpress`, the `crawlers` lines, the two `feed` lines,

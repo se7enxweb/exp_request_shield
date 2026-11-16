@@ -7,7 +7,7 @@
 # needs on top. Reasons: docs/use-cases/exponential.md.
 
 ids EXP
-version 2026-10-17.1
+version 2026-11-16.1
 
 include     exponential.rules                                  # the frontend: system URLs, forms, search, pace
 
@@ -28,6 +28,20 @@ method      GET HEAD POST OPTIONS PUT PATCH DELETE
 expect DELETE /admin/explayouts_ui_api/app/api/layouts/19/draft with pass   answered
 expect PATCH /admin/explayouts_ui_api/app/api/layouts/19 with pass   answered
 expect DELETE /admin/content/view/full/2 with pass   405   # anywhere else in the admin: still refused
+
+# Setup > Ini settings (/admin/settings/view/admin/site.ini) and the template
+# views (/admin/visual/templateview/node/view/full.tpl) are module views named
+# after a file: EXP-INI refused them with 404, so the admin could not show any
+# setting or template. Taken back only there; every other address named .ini or
+# .tpl stays refused.
+[EXP-ADMIN-INI]   unblock [EXP-INI] at /admin/settings/view/** /admin/settings/edit/** /admin/visual/templateview/** /admin/visual/templateedit/** /admin/visual/templatecreate/**
+expect GET /admin/settings/view/admin/site.ini with pass                     answered
+expect GET /admin/settings/edit/admin/site.ini/DebugSettings/DebugOutput/siteaccess with pass   answered
+expect GET /admin/visual/templateview/node/view/full.tpl with pass           answered
+expect POST /admin/visual/templateedit/node/view/full.tpl with pass          answered
+expect GET /admin/settings/site.ini with pass                                404 by EXP-INI
+expect GET /admin/extension/shop/settings/shop.ini.append.php with pass      404 by EXP-INI
+expect GET /settings/view/admin/site.ini                                     404 by EXP-INTERNAL   # outside the admin: still refused
 
 match /admin/** {
   [EXP-ADMIN-SYS]   unblock [EXP-SYSVIEW] [EXP-MODULES]       # the admin uses system URLs (/admin/content/view/full/2) and its modules
