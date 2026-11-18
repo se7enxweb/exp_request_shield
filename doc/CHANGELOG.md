@@ -1,7 +1,13 @@
 # Changelog
 
-## Unreleased
+## 0.0.1.7
 
+- Fixed: The passkeys, sessions, security, deactivation and two-step sign-in forms are no longer refused with 405.
+  `EXP-POST` let a POST through only at the older account forms, so adding or removing a passkey
+  (`/user/passkeys`), signing out other sessions (`/user/sessions`), the security page (`/user/security`), deactivating
+  an account (`/user/deactivate`) and the second sign-in step and its setup (`/user2fa/...`) were answered 405. They
+  are allowed now, with `expect` lines for each. Sites that copied `EXP-POST` into a rule file of their own should
+  take the new line.
 - Fixed: Setup > Ini settings and the template views work in the administration. `EXP-INI` (`*.ini`, `*.tpl`,
   anywhere) refused `/admin/settings/view/admin/site.ini`, `/admin/settings/edit/...` and
   `/admin/visual/templateview|templateedit|templatecreate/...` with 404: those are module views named after a file,
