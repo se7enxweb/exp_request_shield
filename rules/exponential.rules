@@ -90,9 +90,13 @@ expect GET /news/(offset)/99999999                 404   # counting through a li
 # --------------------------------------------------------------------------
 # A POST only where Exponential takes one. Anything else: 405 -- a bot that
 # posts to every address it finds gets nowhere. Add your extensions' modules.
-[EXP-POST]      allow POST **/paypal/notify_url/** **/user/login **/user/register **/user/forgotpassword **/user/password/** **/user/edit/** **/user/preferences/** **/content/action **/content/edit/** **/content/collectedinfo/** **/content/tipafriend/** **/content/search **/content/advancedsearch **/comment/** **/shop/** **/ezjscore/** **/notification/** **/newsletter/** /api/**   # forms: login, register, collect information, comments, basket, AJAX, REST (the admin: in its own file)
+[EXP-POST]      allow POST **/paypal/notify_url/** **/user/login **/user/register **/user/forgotpassword **/user/password/** **/user/edit/** **/user/preferences/** **/user/passkeys **/user/passkeys/** **/user/sessions **/user/sessions/** **/user/security **/user/security/** **/user/deactivate **/user/deactivate/** **/user2fa/** **/content/action **/content/edit/** **/content/collectedinfo/** **/content/tipafriend/** **/content/search **/content/advancedsearch **/comment/** **/shop/** **/ezjscore/** **/notification/** **/newsletter/** /api/**   # forms: login, register, collect information, comments, basket, AJAX, REST (the admin: in its own file)
 expect POST /news/2026/fit-and-healthy            405   # no form lives at a page's alias
 expect POST /ezjscore/call/ezstarrating::rate      answered
+expect POST /user/passkeys with pass               answered   # add or remove a passkey (account page)
+expect POST /user/sessions with pass               answered   # sign out other sessions
+expect POST /user2fa/verify with pass               answered   # the second sign-in step
+expect POST /user2fa/setup with pass               answered   # set up two-step sign-in
 
 # The login and everything around it: every visitor is checked first (an
 # invisible task the browser solves in about a second). A pass from the last
