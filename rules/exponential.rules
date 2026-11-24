@@ -68,6 +68,14 @@ expect GET /news/setup-guide                       answered
 expect GET /settings/site.ini                     404
 expect GET /var/site/cache/expiry.php              404
 expect GET /var/site/storage/images/a.jpg          answered   # uploaded files stay open
+# The public part of the cache: packed stylesheets and scripts, text images. On a
+# cluster site the cluster gateway (index_cluster.php) serves them, so they reach
+# PHP and must not be refused; elsewhere the web server serves them directly.
+[EXP-PUBLIC-CACHE] unblock [EXP-INTERNAL] at /var/*/cache/public/** /var/*/cache/texttoimage/**
+expect GET /var/site/cache/public/stylesheets/a_all.css    answered
+expect GET /var/site/cache/public/javascript/a.js          answered
+expect GET /var/site/cache/texttoimage/a.png               answered
+expect GET /var/site/cache/template/a.php                  404 by EXP-INTERNAL   # the rest of the cache stays refused
 [EXP-INI]       block *.ini *.ini.append *.ini.append.php *.tpl                    # configuration and template sources, anywhere
 expect GET /extension/shop/settings/shop.ini.append.php  404
 
