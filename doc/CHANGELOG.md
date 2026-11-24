@@ -1,5 +1,12 @@
 # Changelog
 
+## Unreleased
+
+- Fixed: A page the browser loads itself always gets the HTML check page, never the JSON task. A navigation
+  (`Sec-Fetch-Mode: navigate`, or `Sec-Fetch-Dest: document`) was answered as an API when its path matched an
+  `api-path` rule or its request came through a service worker, so the browser showed the raw JSON challenge instead
+  of "One moment, please" (exponential#367). Background calls (`fetch()`, `XMLHttpRequest`) still get JSON.
+
 ## 0.0.1.7
 
 - Fixed: The passkeys, sessions, security, deactivation and two-step sign-in forms are no longer refused with 405.

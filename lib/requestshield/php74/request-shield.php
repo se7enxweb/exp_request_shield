@@ -21823,6 +21823,12 @@ final class Shield
      */
     public function isApi(Request $request): bool
     {
+        // A page load the browser makes itself (it says navigate, or asks for a document) shows the HTML check page,
+        // never the JSON task -- whatever the path, its Accept header or a service worker relaying it. (exponential#367)
+        if (strcasecmp((string) $request->header('sec-fetch-mode'), 'navigate') === 0
+            || strcasecmp((string) $request->header('sec-fetch-dest'), 'document') === 0) {
+            return false;
+        }
         if (self::isBackground($request)) {
             return true;
         }
