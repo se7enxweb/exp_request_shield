@@ -19,7 +19,7 @@
 # the included exponential*.rules are request-shield's, under its MIT License (LICENSE.md).
 
 ids SITE
-version 0.0.1.7
+version 0.0.1.8
 
 # The Exponential rules of the library (examples/exponential/, copied unchanged):
 # the frontend (exponential.rules) and the admin as the siteaccess /admin.

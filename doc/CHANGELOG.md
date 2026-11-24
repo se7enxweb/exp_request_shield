@@ -1,7 +1,12 @@
 # Changelog
 
-## Unreleased
+## 0.0.1.8
 
+- Fixed: Packed stylesheets and scripts load on cluster sites. On a cluster site the cluster gateway
+  (`index_cluster.php`) serves the public part of the cache, the packed stylesheets and scripts and the text images,
+  so those requests reach PHP. `EXP-INTERNAL` refused them as internal files, and a cluster site lost its styles
+  whenever it rebuilt its packed files. `EXP-PUBLIC-CACHE` opens `var/<site>/cache/public/` and
+  `var/<site>/cache/texttoimage/` again; the rest of the cache stays refused.
 - Fixed: A page the browser loads itself always gets the HTML check page, never the JSON task. A navigation
   (`Sec-Fetch-Mode: navigate`, or `Sec-Fetch-Dest: document`) was answered as an API when its path matched an
   `api-path` rule or its request came through a service worker, so the browser showed the raw JSON challenge instead
