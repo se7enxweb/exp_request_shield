@@ -8,7 +8,7 @@
  * var/request-shield/PAUSED, or "set mode off" in the main rule file (read
  * again within its "recheck" seconds).
  *
- * @copyright Copyright (C) 1998 - 2026 Exponential Foundation and 7x. All rights reserved.
+ * @copyright Copyright (C) 1998 - 2026 Exponential Foundation and 7x; All rights reserved.
  * @license GNU General Public License v2.0 (or any later version), see LICENSE
  * @package exp_request_shield
  */

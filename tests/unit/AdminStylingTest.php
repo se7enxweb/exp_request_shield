@@ -10,7 +10,7 @@
  * - every string of the templates and views is in the eng-US, ger-DE and untranslated catalogues;
  * - the extension's own files say GPL-2.0-or-later, the bundled library keeps its MIT license.
  *
- * @copyright Copyright (C) 1998 - 2026 Exponential Foundation and 7x. All rights reserved.
+ * @copyright Copyright (C) 1998 - 2026 Exponential Foundation and 7x; All rights reserved.
  * @license GNU General Public License v2.0 (or any later version), see LICENSE
  * @package exp_request_shield
  */

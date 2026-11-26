@@ -5,7 +5,7 @@
  * update) and the crawlers' published address lists (request-shield crawlers update). Each list keeps its own
  * shortest interval, so running more often fetches nothing new. The lists go to the rules' store-dir.
  *
- * @copyright Copyright (C) 1998 - 2026 Exponential Foundation and 7x. All rights reserved.
+ * @copyright Copyright (C) 1998 - 2026 Exponential Foundation and 7x; All rights reserved.
  * @license GNU General Public License v2.0 (or any later version), see LICENSE
  * @package exp_request_shield
  */

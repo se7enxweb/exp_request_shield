@@ -6,7 +6,7 @@
  * action ends in a redirect to the dashboard, which shows its outcome once, so a reload repeats nothing. Every action
  * is written to var/log/requestshield.log with the user who did it.
  *
- * @copyright Copyright (C) 1998 - 2026 Exponential Foundation and 7x. All rights reserved.
+ * @copyright Copyright (C) 1998 - 2026 Exponential Foundation and 7x; All rights reserved.
  * @license GNU General Public License v2.0 (or any later version), see LICENSE
  * @package exp_request_shield
  */

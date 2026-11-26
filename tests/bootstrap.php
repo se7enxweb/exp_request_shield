@@ -6,7 +6,7 @@
  * INI, no session. The library is loaded by the tests that need it (expRequestShield::loadLibrary()). The default
  * time zone is UTC, so a test that needs another one says so.
  *
- * @copyright Copyright (C) 1998 - 2026 Exponential Foundation and 7x. All rights reserved.
+ * @copyright Copyright (C) 1998 - 2026 Exponential Foundation and 7x; All rights reserved.
  * @license GNU General Public License v2.0 (or any later version), see LICENSE
  * @package exp_request_shield
  */

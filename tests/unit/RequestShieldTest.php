@@ -4,7 +4,7 @@
  * loaded, the groups of log actions, the log summary and the chart geometry of the admin, and the extension's
  * default rules checked and tested with the bundled library (every example passes, enforce mode).
  *
- * @copyright Copyright (C) 1998 - 2026 Exponential Foundation and 7x. All rights reserved.
+ * @copyright Copyright (C) 1998 - 2026 Exponential Foundation and 7x; All rights reserved.
  * @license GNU General Public License v2.0 (or any later version), see LICENSE
  * @package exp_request_shield
  */
