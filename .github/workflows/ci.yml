@@ -14,3 +14,5 @@ jobs:
     uses: se7enxweb/.github/.github/workflows/extension-ci.yml@main
     with:
       phpunit: true
+      # lib/requestshield/*.php is loaded on PHP 8.0 and later only; PHP 7.4 loads lib/requestshield/php74/
+      lint-exclude-php74: '^lib/requestshield/[^/]+\.php$'
