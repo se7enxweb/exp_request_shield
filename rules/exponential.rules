@@ -106,6 +106,18 @@ expect POST /user/sessions with pass               answered   # sign out other s
 expect POST /user2fa/verify with pass               answered   # the second sign-in step
 expect POST /user2fa/setup with pass               answered   # set up two-step sign-in
 
+# The setup wizard. With [SiteAccessSettings] CheckValidity=true every address
+# is the wizard (index.php hands each request to it), so its pages -- the
+# "already installed" page, the confirm page and every step -- post back to
+# the site root (Exponential 6.0.15 and later). /setup/... stays refused by
+# EXP-MODULES: the admin module is not a frontend address. The shield cannot
+# see CheckValidity, so the rule is off: take the "#" away only while you run
+# the wizard, and put it back afterwards (a normal site takes no POST at /).
+#[EXP-SETUP-POST] allow POST /                                                    # only while CheckValidity=true: the setup wizard's forms post to the site root
+expect GET /                                       answered   # the wizard's page (or the front page)
+expect POST / header Origin:https://www.example.org   405 by EXP-POST   # the rule above is off: no POST at the root
+expect POST /setup/init header Origin:https://www.example.org   404 by EXP-MODULES   # never the admin module's address
+
 # The login and everything around it: every visitor is checked first (an
 # invisible task the browser solves in about a second). A pass from the last
 # 15 minutes is enough, so the form sends without a second check.

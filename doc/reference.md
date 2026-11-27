@@ -311,6 +311,7 @@ never edit the copies, so they can be refreshed.
 | `EXP-DOWNLOAD` | `unblock [SCAN-BACKUP@1] at **/content/download/** /var/*/storage/**` | uploaded archives (`.zip`, `.sql` ...) stay downloadable |
 | `EXP-VIEWPARAMS` | `block regex (?i)/\((offset\|limit\|year\|month\|day)\)/(?![0-9]{1,6}(/\|$))` | view parameters must be numbers up to 6 digits |
 | `EXP-POST` | `allow POST **/user/login **/content/action ... /api/**` | POST only where Exponential takes a form; **add your extensions' modules** |
+| `EXP-SETUP-POST` | `#allow POST /` (off) | take the `#` away only while `CheckValidity=true` runs the setup wizard: its forms post to the site root; `/setup/...` stays refused by `EXP-MODULES` |
 | `EXP-LOGIN` | `challenge **/user/login **/user/register **/user/forgotpassword **/user/password/** max-age 15m` | the login and registration: the browser check first |
 | `EXP-FORMS` | `challenge **/content/action **/content/tipafriend/** **/comment/add/** **/newsletter/subscribe/** max-age 30m` | contact forms, comments, newsletter |
 | `EXP-ORIGIN` | `post-origin same` | forms only from the website's own pages |

@@ -1,5 +1,13 @@
 # Changelog
 
+## Unreleased
+
+- Added: `EXP-SETUP-POST`, shipped commented out. With `[SiteAccessSettings] CheckValidity=true` every address is the
+  setup wizard, and from Exponential 6.0.15 on its pages (the "already installed" page, the confirm page and every
+  step) post back to the site root instead of `/setup/init`, which `EXP-MODULES` rightly refuses in the frontend.
+  `EXP-POST` answers a POST at `/` with 405, so take the `#` away from `EXP-SETUP-POST` (`allow POST /`) only while
+  the wizard runs, and put it back afterwards: the shield cannot see `CheckValidity`. `/setup/...` stays 404.
+
 ## 0.0.1.8
 
 - Fixed: Packed stylesheets and scripts load on cluster sites. On a cluster site the cluster gateway
